@@ -1,0 +1,1633 @@
+<!doctype html>
+<html lang="th" class="h-full">
+ <head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>ระบบสอบ CRB ออนไลน์</title>
+  <script src="https://cdn.tailwindcss.com"></script>
+  <script src="/_sdk/element_sdk.js"></script>
+  <script src="/_sdk/data_sdk.js"></script>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Kanit:wght@300;400;500;600;700&amp;display=swap" rel="stylesheet">
+  <style>
+    body {
+      box-sizing: border-box;
+      font-family: 'Kanit', sans-serif;
+    }
+    
+    * {
+      margin: 0;
+      padding: 0;
+      box-sizing: border-box;
+    }
+    
+    .page-container {
+      display: none;
+      position: fixed;
+      top: 0;
+      left: 0;
+      width: 100%;
+      height: 100%;
+      background: white;
+      z-index: 1000;
+      overflow-y: auto;
+    }
+    
+    .page-container.active {
+      display: block;
+    }
+    
+    @keyframes slideIn {
+      from {
+        opacity: 0;
+        transform: translateY(20px);
+      }
+      to {
+        opacity: 1;
+        transform: translateY(0);
+      }
+    }
+    
+    .animate-in {
+      animation: slideIn 0.4s ease-out;
+    }
+  </style>
+  <style>@view-transition { navigation: auto; }</style>
+ </head>
+ <body class="h-full w-full bg-gradient-to-br from-indigo-100 via-purple-50 to-pink-100"><!-- Landing Page -->
+  <div id="landing-page" class="page-container active h-full w-full flex items-center justify-center p-6">
+   <div class="max-w-md w-full bg-white rounded-3xl shadow-2xl p-8 animate-in">
+    <div class="text-center mb-8">
+     <div class="w-20 h-20 bg-gradient-to-br from-indigo-600 to-purple-600 rounded-2xl flex items-center justify-center mx-auto mb-4"><span class="text-4xl">📚</span>
+     </div>
+     <h1 id="title-main" class="text-3xl font-bold text-gray-900 mb-2">ระบบสอบ CRB ออนไลน์</h1>
+     <p id="welcome-main" class="text-gray-600">ระบบจัดการการสอบและบันทึกผลการสอบ</p>
+    </div>
+    <div class="space-y-3"><button onclick="showPage('login')" class="w-full bg-gradient-to-r from-indigo-600 to-purple-600 hover:from-indigo-700 hover:to-purple-700 text-white py-4 rounded-xl font-medium transition-all shadow-lg"> เข้าสู่ระบบนักศึกษา </button> <button onclick="showPage('register')" class="w-full bg-white border-2 border-indigo-300 text-indigo-700 py-4 rounded-xl font-medium hover:bg-indigo-50 transition-all"> ลงทะเบียน </button> <button onclick="showPage('admin-login')" class="w-full bg-gradient-to-r from-purple-600 to-pink-600 hover:from-purple-700 hover:to-pink-700 text-white py-4 rounded-xl font-medium transition-all shadow-lg"> เข้าสู่ระบบอาจารย์ </button>
+    </div>
+    <div class="mt-8 grid grid-cols-3 gap-3 text-center">
+     <div class="bg-indigo-50 rounded-xl p-3">
+      <div class="text-2xl font-bold text-indigo-600">
+       18
+      </div>
+      <div class="text-xs text-gray-600">
+       บทเรียน
+      </div>
+     </div>
+     <div class="bg-purple-50 rounded-xl p-3">
+      <div class="text-2xl">
+       📋
+      </div>
+      <div class="text-xs text-gray-600">
+       จองสอบ
+      </div>
+     </div>
+     <div class="bg-pink-50 rounded-xl p-3">
+      <div class="text-2xl">
+       📝
+      </div>
+      <div class="text-xs text-gray-600">
+       บันทึกผล
+      </div>
+     </div>
+    </div>
+   </div>
+  </div><!-- Register Page -->
+  <div id="register-page" class="page-container h-full w-full overflow-auto">
+   <div class="min-h-full flex items-center justify-center p-6">
+    <div class="max-w-md w-full bg-white rounded-3xl shadow-2xl overflow-hidden animate-in">
+     <div class="bg-gradient-to-r from-indigo-600 to-purple-600 p-6"><button onclick="showPage('landing')" class="text-white mb-4 flex items-center gap-2 hover:gap-3 transition-all"> <span>←</span> <span>กลับ</span> </button>
+      <h2 class="text-2xl font-bold text-white">ลงทะเบียน</h2>
+      <p class="text-indigo-100 text-sm mt-1">กรอกข้อมูลเพื่อสร้างบัญชีใหม่</p>
+     </div>
+     <form id="register-form" class="p-6 space-y-4">
+      <div><label for="reg-name" class="block text-sm font-medium text-gray-700 mb-1">ชื่อ-นามสกุล</label> <input type="text" id="reg-name" required class="w-full px-4 py-3 border border-gray-300 rounded-xl focus:outline-none focus:ring-2 focus:ring-indigo-500" placeholder="ชื่อเต็ม">
+      </div>
+      <div><label for="reg-email" class="block text-sm font-medium text-gray-700 mb-1">อีเมล</label> <input type="email" id="reg-email" required class="w-full px-4 py-3 border border-gray-300 rounded-xl focus:outline-none focus:ring-2 focus:ring-indigo-500" placeholder="email@example.com">
+      </div>
+      <div><label for="reg-password" class="block text-sm font-medium text-gray-700 mb-1">รหัสผ่าน (อย่างน้อย 6 ตัวอักษร)</label> <input type="password" id="reg-password" required minlength="6" class="w-full px-4 py-3 border border-gray-300 rounded-xl focus:outline-none focus:ring-2 focus:ring-indigo-500" placeholder="••••••">
+      </div>
+      <div><label for="reg-confirm" class="block text-sm font-medium text-gray-700 mb-1">ยืนยันรหัสผ่าน</label> <input type="password" id="reg-confirm" required minlength="6" class="w-full px-4 py-3 border border-gray-300 rounded-xl focus:outline-none focus:ring-2 focus:ring-indigo-500" placeholder="••••••">
+      </div>
+      <div id="reg-error" class="hidden bg-red-50 border border-red-200 text-red-700 px-4 py-3 rounded-xl text-sm"></div><button type="submit" id="reg-btn" class="w-full bg-gradient-to-r from-indigo-600 to-purple-600 hover:from-indigo-700 hover:to-purple-700 text-white py-4 rounded-xl font-medium transition-all shadow-lg"> ลงทะเบียน </button>
+     </form>
+     <div class="px-6 pb-6 text-center">
+      <p class="text-gray-600 text-sm">มีบัญชีอยู่แล้ว? <button onclick="showPage('login')" class="text-indigo-600 font-medium">เข้าสู่ระบบ</button></p>
+     </div>
+    </div>
+   </div>
+  </div><!-- Login Page -->
+  <div id="login-page" class="page-container h-full w-full overflow-auto">
+   <div class="min-h-full flex items-center justify-center p-6">
+    <div class="max-w-md w-full bg-white rounded-3xl shadow-2xl overflow-hidden animate-in">
+     <div class="bg-gradient-to-r from-indigo-600 to-purple-600 p-6"><button onclick="showPage('landing')" class="text-white mb-4 flex items-center gap-2 hover:gap-3 transition-all"> <span>←</span> <span>กลับ</span> </button>
+      <h2 class="text-2xl font-bold text-white">เข้าสู่ระบบนักศึกษา</h2>
+      <p class="text-indigo-100 text-sm mt-1">ยินดีต้อนรับกลับมา</p>
+     </div>
+     <form id="login-form" class="p-6 space-y-4">
+      <div><label for="login-email" class="block text-sm font-medium text-gray-700 mb-1">อีเมล</label> <input type="email" id="login-email" required class="w-full px-4 py-3 border border-gray-300 rounded-xl focus:outline-none focus:ring-2 focus:ring-indigo-500" placeholder="email@example.com">
+      </div>
+      <div><label for="login-password" class="block text-sm font-medium text-gray-700 mb-1">รหัสผ่าน</label> <input type="password" id="login-password" required class="w-full px-4 py-3 border border-gray-300 rounded-xl focus:outline-none focus:ring-2 focus:ring-indigo-500" placeholder="••••••">
+      </div>
+      <div id="login-error" class="hidden bg-red-50 border border-red-200 text-red-700 px-4 py-3 rounded-xl text-sm"></div><button type="submit" id="login-btn" class="w-full bg-gradient-to-r from-indigo-600 to-purple-600 hover:from-indigo-700 hover:to-purple-700 text-white py-4 rounded-xl font-medium transition-all shadow-lg"> เข้าสู่ระบบ </button>
+     </form>
+     <div class="px-6 pb-6 text-center">
+      <p class="text-gray-600 text-sm">ยังไม่มีบัญชี? <button onclick="showPage('register')" class="text-indigo-600 font-medium">ลงทะเบียน</button></p>
+     </div>
+    </div>
+   </div>
+  </div><!-- Admin Login Page -->
+  <div id="admin-login-page" class="page-container h-full w-full overflow-auto">
+   <div class="min-h-full flex items-center justify-center p-6">
+    <div class="max-w-md w-full bg-white rounded-3xl shadow-2xl overflow-hidden animate-in">
+     <div class="bg-gradient-to-r from-purple-600 to-pink-600 p-6"><button onclick="showPage('landing')" class="text-white mb-4 flex items-center gap-2 hover:gap-3 transition-all"> <span>←</span> <span>กลับ</span> </button>
+      <h2 class="text-2xl font-bold text-white">เข้าสู่ระบบอาจารย์</h2>
+      <p class="text-purple-100 text-sm mt-1">สำหรับผู้คุมสอบเท่านั้น</p>
+     </div>
+     <form id="admin-login-form" class="p-6 space-y-4">
+      <div><label for="admin-username" class="block text-sm font-medium text-gray-700 mb-1">ชื่อผู้ใช้</label> <input type="text" id="admin-username" required class="w-full px-4 py-3 border border-gray-300 rounded-xl focus:outline-none focus:ring-2 focus:ring-purple-500" placeholder="ชื่อผู้ใช้">
+      </div>
+      <div><label for="admin-password" class="block text-sm font-medium text-gray-700 mb-1">รหัสผ่าน</label> <input type="password" id="admin-password" required class="w-full px-4 py-3 border border-gray-300 rounded-xl focus:outline-none focus:ring-2 focus:ring-purple-500" placeholder="••••••">
+      </div>
+      <div id="admin-login-error" class="hidden bg-red-50 border border-red-200 text-red-700 px-4 py-3 rounded-xl text-sm"></div><button type="submit" id="admin-login-btn" class="w-full bg-gradient-to-r from-purple-600 to-pink-600 hover:from-purple-700 hover:to-pink-700 text-white py-4 rounded-xl font-medium transition-all shadow-lg"> เข้าสู่ระบบอาจารย์ </button>
+     </form>
+    </div>
+   </div>
+  </div><!-- Admin Dashboard Page -->
+  <div id="admin-dashboard-page" class="page-container h-full w-full overflow-auto bg-gray-50">
+   <div class="min-h-full">
+    <header class="bg-gradient-to-r from-purple-600 to-pink-600 text-white shadow-lg">
+     <div class="max-w-7xl mx-auto px-6 py-4 flex items-center justify-between">
+      <div>
+       <h1 class="text-xl font-bold">Dashboard อาจารย์</h1>
+       <p id="admin-name" class="text-sm text-purple-100">ผู้คุมสอบ</p>
+      </div><button onclick="logout()" class="bg-white/20 hover:bg-white/30 px-4 py-2 rounded-lg text-sm transition-all"> ออกจากระบบ </button>
+     </div>
+    </header>
+    <main class="max-w-7xl mx-auto px-6 py-8">
+     <div class="mb-6">
+      <h2 class="text-2xl font-bold text-gray-900">รายการนักศึกษาที่จองสอบกับคุณ</h2>
+      <p class="text-gray-600">จัดการและบันทึกผลการสอบสำหรับนักศึกษา</p>
+     </div>
+     <div id="admin-bookings-list" class="space-y-4"></div>
+    </main>
+   </div>
+  </div><!-- Dashboard Page -->
+  <div id="dashboard-page" class="page-container h-full w-full overflow-auto bg-gray-50">
+   <div class="min-h-full">
+    <header class="bg-gradient-to-r from-indigo-600 to-purple-600 text-white shadow-lg">
+     <div class="max-w-7xl mx-auto px-6 py-4 flex items-center justify-between">
+      <div>
+       <h1 class="text-xl font-bold">ยินดีต้อนรับ</h1>
+       <p id="user-name" class="text-sm text-indigo-100">ผู้ใช้งาน</p>
+      </div><button onclick="logout()" class="bg-white/20 hover:bg-white/30 px-4 py-2 rounded-lg text-sm transition-all"> ออกจากระบบ </button>
+     </div>
+    </header>
+    <main class="max-w-7xl mx-auto px-6 py-8">
+     <div class="grid md:grid-cols-2 gap-4 mb-8">
+      <div class="bg-white rounded-xl shadow p-6">
+       <div class="flex items-center gap-4">
+        <div class="w-12 h-12 bg-indigo-100 rounded-xl flex items-center justify-center"><span class="text-2xl">👤</span>
+        </div>
+        <div>
+         <p class="text-sm text-gray-500">ชื่อผู้ใช้</p>
+         <p id="profile-name" class="font-bold text-gray-900">-</p>
+        </div>
+       </div>
+      </div>
+      <div class="bg-white rounded-xl shadow p-6">
+       <div class="flex items-center gap-4">
+        <div class="w-12 h-12 bg-purple-100 rounded-xl flex items-center justify-center"><span class="text-2xl">📧</span>
+        </div>
+        <div>
+         <p class="text-sm text-gray-500">อีเมล</p>
+         <p id="profile-email" class="font-bold text-gray-900">-</p>
+        </div>
+       </div>
+      </div>
+     </div>
+     <div class="grid md:grid-cols-3 gap-6"><button onclick="showPage('topics')" class="bg-white rounded-xl shadow-lg p-6 text-left hover:shadow-xl transition-all group">
+       <div class="w-14 h-14 bg-gradient-to-br from-blue-500 to-blue-600 rounded-xl flex items-center justify-center mb-4 group-hover:scale-110 transition-transform"><span class="text-3xl">📚</span>
+       </div><h3 class="text-lg font-bold text-gray-900 mb-1">เลือกหัวข้อสอบ</h3><p class="text-sm text-gray-600">เลือกบทที่ต้องการสอบ (18 บท)</p></button> <button onclick="showPage('bookings')" class="bg-white rounded-xl shadow-lg p-6 text-left hover:shadow-xl transition-all group">
+       <div class="w-14 h-14 bg-gradient-to-br from-green-500 to-emerald-600 rounded-xl flex items-center justify-center mb-4 group-hover:scale-110 transition-transform"><span class="text-3xl">📋</span>
+       </div><h3 class="text-lg font-bold text-gray-900 mb-1">รายการจองสอบ</h3><p class="text-sm text-gray-600">ดูและจัดการรายการจอง</p></button> <button onclick="showPage('summary')" class="bg-white rounded-xl shadow-lg p-6 text-left hover:shadow-xl transition-all group">
+       <div class="w-14 h-14 bg-gradient-to-br from-purple-500 to-pink-600 rounded-xl flex items-center justify-center mb-4 group-hover:scale-110 transition-transform"><span class="text-3xl">📊</span>
+       </div><h3 class="text-lg font-bold text-gray-900 mb-1">สรุปผลการสอบ</h3><p class="text-sm text-gray-600">ดูสถิติและประวัติการสอบ</p></button>
+     </div>
+    </main>
+   </div>
+  </div><!-- Topics Page -->
+  <div id="topics-page" class="page-container h-full w-full overflow-auto bg-gray-50">
+   <div class="min-h-full">
+    <header class="bg-gradient-to-r from-indigo-600 to-purple-600 text-white shadow-lg">
+     <div class="max-w-7xl mx-auto px-6 py-4"><button onclick="showPage('dashboard')" class="text-white mb-2 flex items-center gap-2 hover:gap-3 transition-all"> <span>←</span> <span>กลับ</span> </button>
+      <h1 class="text-xl font-bold">เลือกหัวข้อสอบ</h1>
+      <p class="text-sm text-indigo-100">เลือกบทที่ต้องการทำการสอบ</p>
+     </div>
+    </header>
+    <main class="max-w-7xl mx-auto px-6 py-8">
+     <div id="topics-list" class="grid md:grid-cols-2 lg:grid-cols-3 gap-6"></div>
+    </main>
+   </div>
+  </div><!-- Subtopics Page -->
+  <div id="subtopics-page" class="page-container h-full w-full overflow-auto bg-gray-50">
+   <div class="min-h-full">
+    <header class="bg-gradient-to-r from-indigo-600 to-purple-600 text-white shadow-lg">
+     <div class="max-w-7xl mx-auto px-6 py-4"><button onclick="showPage('topics')" class="text-white mb-2 flex items-center gap-2 hover:gap-3 transition-all"> <span>←</span> <span>กลับ</span> </button>
+      <h1 id="subtopic-title" class="text-xl font-bold">เลือกหัวข้อย่อย</h1>
+      <p class="text-sm text-indigo-100">เลือกหัวข้อย่อยที่ต้องการสอบ</p>
+     </div>
+    </header>
+    <main class="max-w-5xl mx-auto px-6 py-8">
+     <div id="subtopics-list" class="space-y-3"></div>
+    </main>
+   </div>
+  </div><!-- Booking Page -->
+  <div id="booking-page" class="page-container h-full w-full overflow-auto bg-gray-50">
+   <div class="min-h-full">
+    <header class="bg-gradient-to-r from-indigo-600 to-purple-600 text-white shadow-lg">
+     <div class="max-w-7xl mx-auto px-6 py-4"><button onclick="backToSubtopics()" class="text-white mb-2 flex items-center gap-2 hover:gap-3 transition-all"> <span>←</span> <span>กลับ</span> </button>
+      <h1 class="text-xl font-bold">จองคิวสอบ</h1>
+      <p id="booking-topic-display" class="text-sm text-indigo-100">กรอกข้อมูลเพื่อจองคิวสอบ</p>
+     </div>
+    </header>
+    <main class="max-w-3xl mx-auto px-6 py-8">
+     <div class="bg-white rounded-xl shadow-lg overflow-hidden">
+      <div class="bg-gradient-to-r from-indigo-500 to-purple-500 p-6">
+       <h2 class="text-xl font-bold text-white">ข้อมูลการจอง</h2>
+      </div>
+      <form id="booking-form" class="p-6 space-y-6">
+       <div class="bg-indigo-50 rounded-xl p-4">
+        <h3 class="font-bold text-gray-900 mb-2">ข้อมูลผู้เข้าสอบ</h3>
+        <div id="booking-user-info" class="text-sm text-gray-700 space-y-1"></div>
+       </div>
+       <div><label class="block text-sm font-medium text-gray-700 mb-3">ประเภทการสอบ</label>
+        <div class="grid grid-cols-2 gap-4"><label class="relative cursor-pointer"> <input type="radio" name="exam-type" value="ประเมินตนเอง" class="peer sr-only" checked onchange="toggleExaminer()">
+          <div class="border-2 border-gray-300 rounded-xl p-4 text-center peer-checked:border-indigo-500 peer-checked:bg-indigo-50 transition-all">
+           <div class="text-3xl mb-2">
+            📝
+           </div>
+           <div class="font-medium">
+            ประเมินตนเอง
+           </div>
+          </div></label> <label class="relative cursor-pointer"> <input type="radio" name="exam-type" value="จองสอบ" class="peer sr-only" onchange="toggleExaminer()">
+          <div class="border-2 border-gray-300 rounded-xl p-4 text-center peer-checked:border-indigo-500 peer-checked:bg-indigo-50 transition-all">
+           <div class="text-3xl mb-2">
+            👨‍🏫
+           </div>
+           <div class="font-medium">
+            จองสอบกับอาจารย์
+           </div>
+          </div></label>
+        </div>
+       </div>
+       <div><label for="exam-date" class="block text-sm font-medium text-gray-700 mb-2">วันที่สอบ</label> <input type="date" id="exam-date" required class="w-full px-4 py-3 border border-gray-300 rounded-xl focus:outline-none focus:ring-2 focus:ring-indigo-500">
+       </div>
+       <div id="examiner-section" class="hidden"><label for="examiner-select" class="block text-sm font-medium text-gray-700 mb-2">เลือกผู้คุมสอบ</label> <select id="examiner-select" class="w-full px-4 py-3 border border-gray-300 rounded-xl focus:outline-none focus:ring-2 focus:ring-indigo-500"> <option value="">-- เลือกผู้คุมสอบ --</option> <option value="DR.CHALERVUT THANSUVAN">DR.CHALERVUT THANSUVAN</option> <option value="CAPT.JAKKRAPHUN RATTANAVISUT">CAPT.JAKKRAPHUN RATTANAVISUT</option> </select>
+       </div>
+       <div id="booking-error" class="hidden bg-red-50 border border-red-200 text-red-700 px-4 py-3 rounded-xl text-sm"></div><button type="submit" id="booking-btn" class="w-full bg-gradient-to-r from-indigo-600 to-purple-600 hover:from-indigo-700 hover:to-purple-700 text-white py-4 rounded-xl font-medium transition-all shadow-lg"> ยืนยันการจอง </button>
+      </form>
+     </div>
+    </main>
+   </div>
+  </div><!-- Bookings List Page -->
+  <div id="bookings-page" class="page-container h-full w-full overflow-auto bg-gray-50">
+   <div class="min-h-full">
+    <header class="bg-gradient-to-r from-indigo-600 to-purple-600 text-white shadow-lg">
+     <div class="max-w-7xl mx-auto px-6 py-4"><button onclick="showPage('dashboard')" class="text-white mb-2 flex items-center gap-2 hover:gap-3 transition-all"> <span>←</span> <span>กลับ</span> </button>
+      <h1 class="text-xl font-bold">รายการจองสอบ</h1>
+      <p class="text-sm text-indigo-100">รายการจองสอบทั้งหมดของคุณ</p>
+     </div>
+    </header>
+    <main class="max-w-7xl mx-auto px-6 py-8">
+     <div id="bookings-list" class="space-y-4"></div>
+    </main>
+   </div>
+  </div><!-- Exam Result Page -->
+  <div id="exam-page" class="page-container h-full w-full overflow-auto bg-gray-50">
+   <div class="min-h-full">
+    <header class="bg-gradient-to-r from-indigo-600 to-purple-600 text-white shadow-lg">
+     <div class="max-w-7xl mx-auto px-6 py-4"><button onclick="backFromExam()" class="text-white mb-2 flex items-center gap-2 hover:gap-3 transition-all"> <span>←</span> <span>กลับ</span> </button>
+      <h1 class="text-xl font-bold">บันทึกผลการสอบ</h1>
+      <p class="text-sm text-indigo-100">กรอกผลการสอบและคะแนน</p>
+     </div>
+    </header>
+    <main class="max-w-4xl mx-auto px-6 py-8">
+     <div class="bg-white rounded-xl shadow-lg overflow-hidden">
+      <div class="bg-gradient-to-r from-indigo-500 to-purple-500 p-6">
+       <h2 class="text-xl font-bold text-white">บันทึกผลการสอบ</h2>
+      </div>
+      <div class="p-6">
+       <div id="exam-info" class="bg-gray-50 rounded-xl p-6 mb-6"></div>
+       <form id="exam-form" class="space-y-6">
+        <div><label class="block text-sm font-medium text-gray-700 mb-3">ผลการสอบ</label>
+         <div class="grid grid-cols-3 gap-4"><label class="relative cursor-pointer"> <input type="radio" name="exam-result" value="ผ่าน" class="peer sr-only" required>
+           <div class="border-2 border-gray-300 rounded-xl p-4 text-center peer-checked:border-green-500 peer-checked:bg-green-50 transition-all">
+            <div class="text-3xl mb-2">
+             ✅
+            </div>
+            <div class="font-medium">
+             ผ่าน
+            </div>
+           </div></label> <label class="relative cursor-pointer"> <input type="radio" name="exam-result" value="ไม่ผ่าน" class="peer sr-only">
+           <div class="border-2 border-gray-300 rounded-xl p-4 text-center peer-checked:border-red-500 peer-checked:bg-red-50 transition-all">
+            <div class="text-3xl mb-2">
+             ❌
+            </div>
+            <div class="font-medium">
+             ไม่ผ่าน
+            </div>
+           </div></label> <label class="relative cursor-pointer"> <input type="radio" name="exam-result" value="ต้องสอบซ่อม" class="peer sr-only">
+           <div class="border-2 border-gray-300 rounded-xl p-4 text-center peer-checked:border-yellow-500 peer-checked:bg-yellow-50 transition-all">
+            <div class="text-3xl mb-2">
+             ⚠️
+            </div>
+            <div class="font-medium">
+             สอบซ่อม
+            </div>
+           </div></label>
+         </div>
+        </div>
+        <div><label for="exam-score" class="block text-sm font-medium text-gray-700 mb-2">คะแนน (0-100)</label> <input type="number" id="exam-score" min="0" max="100" step="0.5" required class="w-full px-4 py-3 border border-gray-300 rounded-xl focus:outline-none focus:ring-2 focus:ring-indigo-500" placeholder="85">
+        </div>
+        <div><label for="exam-notes" class="block text-sm font-medium text-gray-700 mb-2">บันทึกเพิ่มเติม</label> <textarea id="exam-notes" rows="4" class="w-full px-4 py-3 border border-gray-300 rounded-xl focus:outline-none focus:ring-2 focus:ring-indigo-500 resize-none" placeholder="ความคิดเห็นหรือคำแนะนำ (ไม่บังคับ)"></textarea>
+        </div>
+        <div id="exam-error" class="hidden bg-red-50 border border-red-200 text-red-700 px-4 py-3 rounded-xl text-sm"></div><button type="submit" id="exam-btn" class="w-full bg-gradient-to-r from-indigo-600 to-purple-600 hover:from-indigo-700 hover:to-purple-700 text-white py-4 rounded-xl font-medium transition-all shadow-lg"> บันทึกผลการสอบ </button>
+       </form>
+      </div>
+     </div>
+    </main>
+   </div>
+  </div><!-- Summary Page -->
+  <div id="summary-page" class="page-container h-full w-full overflow-auto bg-gray-50">
+   <div class="min-h-full">
+    <header class="bg-gradient-to-r from-purple-600 to-pink-600 text-white shadow-lg">
+     <div class="max-w-7xl mx-auto px-6 py-4"><button onclick="showPage('dashboard')" class="text-white mb-2 flex items-center gap-2 hover:gap-3 transition-all"> <span>←</span> <span>กลับ</span> </button>
+      <h1 class="text-xl font-bold">สรุปผลการสอบ</h1>
+      <p class="text-sm text-purple-100">สถิติและประวัติการสอบของคุณ</p>
+     </div>
+    </header>
+    <main class="max-w-7xl mx-auto px-6 py-8">
+     <div id="summary-content"></div>
+    </main>
+   </div>
+  </div><!-- Toast -->
+  <div id="toast" class="fixed bottom-6 right-6 transform translate-x-full opacity-0 transition-all duration-300 z-50">
+   <div id="toast-content" class="bg-gray-900 text-white px-6 py-4 rounded-xl shadow-2xl flex items-center gap-3 min-w-[300px]"><span id="toast-icon"></span> <span id="toast-message"></span>
+   </div>
+  </div>
+  <script>
+    // State
+    let appState = {
+      allRecords: [],
+      currentUser: null,
+      currentAdmin: null,
+      selectedTopicId: null,
+      selectedTopicName: null,
+      selectedSubtopic: null,
+      currentBookingId: null
+    };
+
+    const ADMIN_ACCOUNTS = {
+      'dr.chalervut': { username: 'dr.chalervut', password: 'cvut2024', fullName: 'DR.CHALERVUT THANSUVAN', isExaminer: true },
+      'capt.jakkraphun': { username: 'capt.jakkraphun', password: 'jrut2024', fullName: 'CAPT.JAKKRAPHUN RATTANAVISUT', isExaminer: true },
+      'admin123': { username: 'admin123', password: '1234567890admin', fullName: 'ผู้ดูแลระบบ', isExaminer: false }
+    };
+
+    const defaultConfig = {
+      app_title: 'ระบบสอบ CRB ออนไลน์',
+      welcome_text: 'ระบบจัดการการสอบและบันทึกผลการสอบ',
+      topic_1_name: 'ธุรกิจการขนส่งทางทะเล',
+      topic_2_name: 'การจัดการโลจิสติกส์',
+      topic_3_name: 'การจัดการการขนส่ง',
+      topic_4_name: 'กฎหมายและนโยบาย',
+      topic_5_name: 'เศรษฐศาสตร์การขนส่ง',
+      topic_6_name: 'การเช่าเรือ',
+      topic_7_name: 'การประกันภัย',
+      topic_8_name: 'ใบตราส่งทางทะเล',
+      topic_9_name: 'การบริหารความเสี่ยง',
+      topic_10_name: 'เทคโนโลยี',
+      topic_11_name: 'ความยั่งยืน',
+      topic_12_name: 'การจัดการวิกฤต',
+      topic_13_name: 'การจัดการต้นทุน',
+      topic_14_name: 'การบริหารลูกค้า',
+      topic_15_name: 'การวางแผนกลยุทธ์',
+      topic_16_name: 'การจัดการห่วงโซ่อุปทาน',
+      topic_17_name: 'กรณีศึกษา',
+      topic_18_name: 'การวางแผนธุรกิจ'
+    };
+
+    const subtopicsData = {
+      '1': [
+        'บทนำ',
+        'เปรียบเทียบกับรูปแบบการขนส่งอื่น',
+        'ความสำคัญของการขนส่งทางทะเลต่อการพัฒนาประเทศไทย',
+        'บทบาทของการขนส่งทางทะเลในเศรษฐกิจโลก',
+        'การพัฒนาเทคโนโลยีในอุตสาหกรรมขนส่งทางทะเล',
+        'ผลกระทบต่อเศรษฐกิจโลก',
+        'ความท้าทายและอนาคตของการขนส่งทางทะเล',
+        'วิวัฒนาการของการขนส่งทางทะเล จากเรือไม้สู่ตู้คอนเทนเนอร์',
+        'โครงการเขตพัฒนาพิเศษภาคตะวันออก (EEC) และบทบาทในด้านการขนส่งทางทะเล',
+        'โครงการท่าเรือบก (Dry Port) ของไทย ในการเชื่อมต่อกับท่าเรือน้ำลึก',
+        'โครงการ Land Bridge ของประเทศไทย',
+        'การเปลี่ยนแปลงเชิงอุตสาหกรรมที่เกิดจากการใช้ตู้คอนเทนเนอร์'
+      ],
+      '2': [
+        'บทบาทและความสำคัญของการจัดการโลจิสติกส์',
+        'ความสัมพันธ์ระหว่างโลจิสติกส์กับโครงสร้างพื้นฐาน',
+        'การจัดการโลจิสติกส์ในประเทศไทย',
+        'โครงสร้างพื้นฐานด้านโลจิสติกส์ในประเทศไทย',
+        'ความท้าทายในการจัดการโลจิสติกส์และโครงสร้างพื้นฐาน',
+        'แนวโน้มในอนาคตของการจัดการโลจิสติกส์และโครงสร้างพื้นฐาน',
+        'บทบาทของโครงสร้างพื้นฐานในอุตสาหกรรมการขนส่ง',
+        'ท่าเรือหลักในระดับโลก',
+        'คลังสินค้าและเทคโนโลยีที่เกี่ยวข้อง',
+        'การจัดการโลจิสติกส์ในธุรกิจการขนส่ง',
+        'แนวคิด Supply Chain Management (SCM)',
+        'การจัดการเส้นทางเดินเรือและตารางการขนส่ง'
+      ],
+      '3': [
+        'บทนำ',
+        'การจัดการการขนส่งสินค้า (Cargo Operations)',
+        'การจัดประเภทสินค้าและขั้นตอนการขนส่งสินค้า',
+        'การวางแผนเส้นทางการเดินเรือ (Route Planning)',
+        'ความท้าทายในอุตสาหกรรมการขนส่งทางทะเล'
+      ],
+      '4': [
+        'กฎหมายและนโยบายการขนส่งทางทะเลในประเทศไทย',
+        'ความสำคัญของการปฏิบัติตามกฎหมายและนโยบาย',
+        'โครงสร้างของกฎหมายทางทะเล',
+        'องค์การทางทะเลระหว่างประเทศ (IMO)',
+        'กฎหมายและอนุสัญญาหลักในอุตสาหกรรมการขนส่งทางทะเล',
+        'การกำกับดูแลท่าเรือและการขนส่งทางทะเล',
+        'นโยบายการขนส่งทางทะเล',
+        'ความสำคัญของนโยบายการขนส่งทางทะเล',
+        'นโยบายการค้าเสรีและการควบคุมการปล่อยก๊าซเรือนกระจก',
+        'การบริหารจัดการเขตเศรษฐกิจ (EEZ)'
+      ],
+      '5': [
+        'บทนำ',
+        'พื้นฐานเศรษฐศาสตร์การขนส่งทางทะเล (Foundations of Maritime Economics)',
+        'ความต้องการและอุปทานในอุตสาหกรรมการขนส่งทางทะเล, การวิเคราะห์ต้นทุนคงที่และต้นทุนผันแปร',
+        'การตั้งราคาสำหรับการขนส่งสินค้าทางทะเล (Pricing in Freight Transportation)',
+        'การกำหนดค่าระวางเรือ (Freight Rates)',
+        'ปัจจัยที่มีผลต่อราคาขนส่ง',
+        'ผลกระทบทางเศรษฐกิจของอุตสาหกรรมการขนส่งทางทะเล (Economic Impacts of the Transportation Industry)',
+        'บทบาทของการขนส่งทางทะเลในห่วงโซ่อุปทาน (Supply Chain)',
+        'การสร้างผลกระทบต่อเศรษฐกิจโลก',
+        'ตลาดหลักของธุรกิจการขนส่งทางทะเล'
+      ],
+      '6': [
+        'บทนำ',
+        'ความหมายของการเช่าเรือ',
+        'ประเภทของการเช่าเรือ (Ship Chartering Types)',
+        'สัญญาเช่าเรือ (Charter Party)',
+        'ขั้นตอนในการเช่าเรือ',
+        'กฎหมายที่เกี่ยวข้องกับการเช่าเรือ (Legal Aspects of Ship Chartering)',
+        'กฎหมายประกันภัยทางทะเลที่เกี่ยวข้องกับการเช่าเรือ',
+        'กฎหมายท่าเรือและศุลกากรที่เกี่ยวข้องกับการเช่าเรือ',
+        'กฎหมายแรงงานทางทะเลที่เกี่ยวข้องกับการเช่าเรือ',
+        'ข้อกำหนดด้านสิ่งแวดล้อมที่เกี่ยวข้องกับการเช่าเรือ',
+        'รูปแบบสัญญามาตรฐานการเช่าเรือของโลก',
+        'กรณีศึกษาที่สำคัญเกี่ยวกับการเช่าเรือ รากของปัญหาและแนวทางป้องกัน'
+      ],
+      '7': [
+        'ความหมายของการประกันภัยทางทะเล',
+        'ความสำคัญของการประกันภัยทางทะเล',
+        'หลักการของการประกันภัยทางทะเล',
+        'ประเภทของการประกันภัยทางทะเล',
+        'ประวัติความเป็นมาของ P&I Insurance (Protection & Indemnity Insurance)',
+        'การประกันภัยความรับผิดของเจ้าของเรือ (Protection & Indemnity – P&I Insurance)',
+        'ความเกี่ยวข้องระหว่าง 3/4 RDC (Three-Fourths Collision Liability Clause) และ P&I Insurance',
+        'กรณี "Both to Blame Collision Clause" กับการประกันภัยทางทะเลและ P&I Insurance',
+        'รูปแบบมาตรฐานของการประกันภัยทางทะเล',
+        'Clause สำคัญที่กำหนดในกรมธรรม์ประกันภัยทางทะเล',
+        'หลักการเฉลี่ยภัย (General Average - GA) และความเกี่ยวข้องกับการประกันภัย',
+        'กฎหมายและอนุสัญญาระหว่างประเทศที่เกี่ยวข้องกับการประกันภัยทางทะเล',
+        'บทบาทของ Classification Society กับการประกันภัยทางทะเล',
+        'รายละเอียดและความสำคัญของ Class Certificate และ Statutory Certificate สำหรับเรือ',
+        'Underwriter ในระบบประกันภัยทางทะเล และที่มาของคำว่า Underwriter?',
+        'กรณีศึกษาที่สำคัญของการประกันภัยทางทะเล และแนวทางการปฏิบัติเพื่อป้องกันไม่ให้เกิดซ้ำ'
+      ],
+      '8': [
+        'ความหมายของใบตราส่งทางทะเล (Bill of Lading - B/L)',
+        'ประเภทของใบตราส่งทางทะเล',
+        'กฎหมายที่เกี่ยวข้องกับใบตราส่งทางทะเล (Bill of Lading - B/L)',
+        'รูปแบบมาตรฐานของโลกเกี่ยวกับ Bill of Lading (B/L)',
+        'บทบาทของ BIMCO กับ Bill of Lading (B/L)',
+        'Clause และเงื่อนไขสำคัญที่กำหนดใน Bill of Lading (B/L)',
+        'กรณีศึกษา เรื่อง B/L',
+        'ความหมายของ General Average',
+        'ข้อยกเว้นความรับผิดชอบของผู้ขนส่ง (Carrier\'s Liability Exceptions) ในกฎหมายระหว่างประเทศและกฎหมายไทย',
+        'กรณีศึกษาสำคัญเกี่ยวกับข้อยกเว้นความรับผิดชอบของ Carrier'
+      ],
+      '9': [
+        'บทนำ',
+        'ความเสี่ยงในธุรกิจการขนส่งทางทะเล',
+        'ความเสี่ยงทางการเงิน',
+        'ความเสี่ยงด้านกฎหมายและการปฏิบัติตามข้อบังคับ',
+        'การบริหารความปลอดภัยในธุรกิจการขนส่งทางทะเล',
+        'ระบบการบริหารความปลอดภัยในการเดินเรือ (ISM Code - International Safety Management)',
+        'การป้องกันและลดความเสี่ยงจากอุบัติเหตุ',
+        'การสร้างแผนบริหารความเสี่ยงในธุรกิจการขนส่งทางทะเล (Risk Management Planning in Shipping Business)',
+        'การประเมินและจัดลำดับความสำคัญของความเสี่ยง',
+        'การวางแผนตอบสนองและการบริหารผลกระทบ'
+      ],
+      '10': [
+        'บทนำ',
+        'เทคโนโลยีสำคัญในธุรกิจการขนส่งทางทะเล (Key Technologies in Maritime Business)',
+        'ระบบติดตามเรือด้วย GPS และ AIS (Automatic Identification System)',
+        'การใช้ Internet of Things (IoT) ในการบริหารจัดการคลังสินค้าและการขนส่ง',
+        'การประยุกต์ใช้ AI และ Big Data',
+        'การวิเคราะห์ข้อมูลเพื่อลดต้นทุนและเพิ่มประสิทธิภาพ',
+        'การใช้ AI ในการคาดการณ์ความต้องการและวางแผนเส้นทาง',
+        'เรืออัตโนมัติ (Autonomous Surface Ship)',
+        'Blockchain ในโลจิสติกส์ทางทะเล',
+        'การจัดการเอกสารและการทำธุรกรรมที่โปร่งใส',
+        'การใช้งาน Blockchain ในธุรกิจโลจิสติกส์ทางทะเล กรณีศึกษา Maersk และ IBM TradeLens'
+      ],
+      '11': [
+        'บทนำ',
+        'ผลกระทบทางสิ่งแวดล้อมของธุรกิจการขนส่งทางทะเล (Environmental Impacts of Shipping Business)',
+        'การปล่อยก๊าซเรือนกระจก (Greenhouse Gas Emissions)',
+        'มลพิษทางทะเล น้ำมันรั่วไหล ของเสียจากเรือ',
+        'เสียงรบกวนและผลกระทบต่อสัตว์ทะเล',
+        'มาตรการความยั่งยืนในธุรกิจการขนส่ง',
+        'การปฏิบัติตาม MARPOL และ IMO 2023 Regulations',
+        'การใช้พลังงานสะอาด',
+        'การพัฒนาเทคโนโลยีที่ช่วยลดผลกระทบ',
+        'การใช้เรือพลังงานลมและพลังงานแสงอาทิตย์',
+        'ระบบบำบัดน้ำเสียบนเรือ'
+      ],
+      '12': [
+        'บทนำ',
+        'ความเสี่ยงและวิกฤตในธุรกิจการขนส่ง',
+        'วิกฤตการณ์จากธรรมชาติ',
+        'วิกฤตการณ์ที่เกิดจากมนุษย์ อุบัติเหตุทางเรือ การล่าช้า และการโจมตีทางไซเบอร์',
+        'ผลกระทบด้านเศรษฐกิจและสิ่งแวดล้อม',
+        'กรณีศึกษา เหตุการณ์เรือ Ever Given ติดคลองสุเอซ (2021)',
+        'กรณีศึกษา การรั่วไหลของน้ำมันจากเรือ Exxon Valdez (1989)',
+        'การจัดการวิกฤตและฟื้นฟู',
+        'การจัดทำแผนบริหารความเสี่ยงในอุตสาหกรรมการขนส่งทางทะเล',
+        'การสื่อสารในสถานการณ์วิกฤตในอุตสาหกรรมการขนส่งทางทะเล',
+        'การฟื้นฟูกิจการและความน่าเชื่อถือในอุตสาหกรรมการขนส่งทางทะเล'
+      ],
+      '13': [
+        'บทนำ',
+        'โครงสร้างต้นทุนในธุรกิจการขนส่ง',
+        'ต้นทุนคงที่ (Fixed Costs)',
+        'ต้นทุนผันแปร (Variable Costs)',
+        'การเปรียบเทียบต้นทุนในเรือประเภทต่าง ๆ (Dry Bulk, Tanker, Container Ship)',
+        'การวิเคราะห์ผลตอบแทนและการกำหนดราคาขนส่ง',
+        'ปัจจัยที่มีผลต่อค่าระวางเรือ (Freight Rates)',
+        'กลยุทธ์การลดต้นทุน'
+      ],
+      '14': [
+        'บทนำ',
+        'ความสำคัญของการบริหารลูกค้าสัมพันธ์ (Customer Relationship Management - CRM)',
+        'กลยุทธ์การพัฒนาธุรกิจ (Business Development)',
+        'การสร้างมูลค่าเพิ่มในอุตสาหกรรมขนส่ง'
+      ],
+      '15': [
+        'บทนำ',
+        'ความสำคัญของการวางแผนกลยุทธ์ในธุรกิจการขนส่งทางทะเล',
+        'กระบวนการวางแผนกลยุทธ์',
+        'กลยุทธ์ในธุรกิจการขนส่ง'
+      ],
+      '16': [
+        'บทนำ',
+        'โครงสร้างของห่วงโซ่อุปทานในธุรกิจการขนส่งทางทะเล',
+        'ปัจจัยที่มีผลต่อห่วงโซ่อุปทาน',
+        'การใช้เทคโนโลยีในห่วงโซ่อุปทาน'
+      ],
+      '17': [
+        'บทนำ',
+        'บทบาทของธุรกิจการขนส่งทางทะเลในเศรษฐกิจโลก',
+        'กรณีศึกษาบริษัทขนส่งระดับโลก',
+        'ปัจจัยแห่งความสำเร็จในธุรกิจขนส่ง',
+        'องค์ประกอบของการจัดการทรัพยากรในธุรกิจการขนส่งทางทะเล',
+        'ความสำคัญของการสร้างความสัมพันธ์กับลูกค้า'
+      ],
+      '18': [
+        'บทนำ',
+        'ความสำคัญของการวางแผนธุรกิจในอุตสาหกรรมการขนส่งทางทะเล',
+        'บทบาทของแผนธุรกิจในการดำเนินการ',
+        'การวิเคราะห์ตลาดและความเข้าใจในแนวโน้มของอุตสาหกรรม',
+        'การจัดการทรัพยากรอย่างมีประสิทธิภาพ',
+        'การบูรณาการเทคโนโลยี',
+        'การจัดการความเสี่ยง',
+        'ความยั่งยืนในแผนธุรกิจ',
+        'องค์ประกอบของแผนธุรกิจในธุรกิจขนส่งทางทะเล',
+        'การวิเคราะห์ตลาด (Market Analysis)',
+        'การกำหนดเป้าหมายในธุรกิจการขนส่งทางทะเล',
+        'การพัฒนากลยุทธ์เพื่อบรรลุเป้าหมาย',
+        'การจัดการทรัพยากรในอุตสาหกรรมการขนส่งทางทะเล',
+        'การจัดการทางการเงินในอุตสาหกรรมการขนส่งทางทะเล',
+        'การบริหารความเสี่ยงและการประเมินผล',
+        'แผนธุรกิจในอุตสาหกรรมการขนส่งทางทะเล'
+      ]
+    };
+
+    // Data Handler
+    const dataHandler = {
+      onDataChanged(data) {
+        appState.allRecords = data || [];
+      }
+    };
+
+    // Utilities
+    function showToast(message, type = 'info') {
+      const toast = document.getElementById('toast');
+      const toastContent = document.getElementById('toast-content');
+      const toastIcon = document.getElementById('toast-icon');
+      const toastMessage = document.getElementById('toast-message');
+
+      const icons = {
+        success: '✓',
+        error: '✕',
+        info: 'ℹ'
+      };
+
+      const colors = {
+        success: 'bg-green-600',
+        error: 'bg-red-600',
+        info: 'bg-gray-900'
+      };
+
+      toastIcon.textContent = icons[type] || icons.info;
+      toastMessage.textContent = message;
+      toastContent.className = `${colors[type] || colors.info} text-white px-6 py-4 rounded-xl shadow-2xl flex items-center gap-3 min-w-[300px]`;
+
+      toast.classList.remove('translate-x-full', 'opacity-0');
+      toast.classList.add('translate-x-0', 'opacity-100');
+
+      setTimeout(() => {
+        toast.classList.add('translate-x-full', 'opacity-0');
+        toast.classList.remove('translate-x-0', 'opacity-100');
+      }, 3000);
+    }
+
+    function showPage(pageId) {
+      document.querySelectorAll('.page-container').forEach(p => p.classList.remove('active'));
+      const page = document.getElementById(`${pageId}-page`);
+      if (page) {
+        page.classList.add('active');
+        window.scrollTo(0, 0);
+      }
+
+      // Load content for specific pages
+      if (pageId === 'topics') renderTopics();
+      if (pageId === 'bookings') renderBookings();
+      if (pageId === 'summary') renderSummary();
+      if (pageId === 'dashboard') updateDashboard();
+      if (pageId === 'admin-dashboard') renderAdminBookings();
+    }
+
+    function updateDashboard() {
+      if (appState.currentUser) {
+        document.getElementById('user-name').textContent = appState.currentUser.full_name;
+        document.getElementById('profile-name').textContent = appState.currentUser.full_name;
+        document.getElementById('profile-email').textContent = appState.currentUser.email;
+      }
+    }
+
+    function logout() {
+      appState.currentUser = null;
+      appState.currentAdmin = null;
+      localStorage.removeItem('crb_session');
+      localStorage.removeItem('crb_admin_session');
+      showToast('ออกจากระบบสำเร็จ', 'success');
+      setTimeout(() => showPage('landing'), 500);
+    }
+
+    function toggleExaminer() {
+      const examType = document.querySelector('input[name="exam-type"]:checked')?.value;
+      const examinerSection = document.getElementById('examiner-section');
+      const examinerSelect = document.getElementById('examiner-select');
+      
+      if (examType === 'จองสอบ') {
+        examinerSection.classList.remove('hidden');
+        examinerSelect.required = true;
+      } else {
+        examinerSection.classList.add('hidden');
+        examinerSelect.required = false;
+        examinerSelect.value = '';
+      }
+    }
+
+    function backToSubtopics() {
+      if (appState.selectedTopicId) {
+        renderSubtopics(appState.selectedTopicId, appState.selectedTopicName);
+        showPage('subtopics');
+      } else {
+        showPage('topics');
+      }
+    }
+
+    function backFromExam() {
+      if (appState.currentAdmin) {
+        showPage('admin-dashboard');
+      } else {
+        showPage('bookings');
+      }
+    }
+
+    // Render Functions
+    function renderTopics() {
+      const container = document.getElementById('topics-list');
+      const config = window.elementSdk?.config || defaultConfig;
+      
+      const colors = ['blue', 'green', 'purple', 'pink', 'indigo', 'rose'];
+      
+      container.innerHTML = '';
+      for (let i = 1; i <= 18; i++) {
+        const topicName = config[`topic_${i}_name`] || defaultConfig[`topic_${i}_name`];
+        const color = colors[i % colors.length];
+        
+        const card = document.createElement('div');
+        card.className = 'bg-white rounded-xl shadow-lg p-6 cursor-pointer hover:shadow-xl transition-all';
+        card.onclick = () => selectTopic(i.toString(), topicName);
+        card.innerHTML = `
+          <div class="w-12 h-12 bg-${color}-100 rounded-xl flex items-center justify-center mb-4">
+            <span class="text-2xl">📖</span>
+          </div>
+          <div class="text-sm text-gray-500 mb-1">บทที่ ${i}</div>
+          <h3 class="text-lg font-bold text-gray-900">${topicName}</h3>
+        `;
+        container.appendChild(card);
+      }
+    }
+
+    function selectTopic(topicId, topicName) {
+      appState.selectedTopicId = topicId;
+      appState.selectedTopicName = topicName;
+      renderSubtopics(topicId, topicName);
+      showPage('subtopics');
+    }
+
+    function renderSubtopics(topicId, topicName) {
+      document.getElementById('subtopic-title').textContent = `บทที่ ${topicId}: ${topicName}`;
+      const container = document.getElementById('subtopics-list');
+      const subtopics = subtopicsData[topicId] || [];
+      
+      container.innerHTML = '';
+      subtopics.forEach((subtopic, idx) => {
+        const card = document.createElement('div');
+        card.className = 'bg-white rounded-xl shadow p-5 cursor-pointer hover:shadow-lg transition-all';
+        card.onclick = () => selectSubtopic(subtopic);
+        card.innerHTML = `
+          <div class="flex items-center justify-between">
+            <div class="flex items-center gap-4">
+              <div class="w-10 h-10 bg-indigo-100 rounded-lg flex items-center justify-center">
+                <span class="font-bold text-indigo-600">${idx + 1}</span>
+              </div>
+              <h3 class="font-bold text-gray-900">${subtopic}</h3>
+            </div>
+            <span class="text-2xl">→</span>
+          </div>
+        `;
+        container.appendChild(card);
+      });
+    }
+
+    function selectSubtopic(subtopic) {
+      appState.selectedSubtopic = subtopic;
+      
+      const config = window.elementSdk?.config || defaultConfig;
+      const topicName = config[`topic_${appState.selectedTopicId}_name`] || defaultConfig[`topic_${appState.selectedTopicId}_name`];
+      
+      document.getElementById('booking-topic-display').textContent = 
+        `บทที่ ${appState.selectedTopicId}: ${topicName} - ${subtopic}`;
+      
+      document.getElementById('booking-user-info').innerHTML = `
+        <p><strong>${appState.currentUser.full_name}</strong></p>
+        <p>${appState.currentUser.email}</p>
+        <p class="mt-2 pt-2 border-t border-indigo-200">หัวข้อ: ${subtopic}</p>
+      `;
+      
+      document.getElementById('booking-form').reset();
+      toggleExaminer();
+      showPage('booking');
+    }
+
+    function renderBookings() {
+      const container = document.getElementById('bookings-list');
+      const myBookings = appState.allRecords.filter(
+        r => r.record_type === 'booking' && r.user_id === appState.currentUser?.user_id
+      );
+
+      if (myBookings.length === 0) {
+        container.innerHTML = `
+          <div class="bg-white rounded-xl shadow p-12 text-center">
+            <div class="text-6xl mb-4">📋</div>
+            <p class="text-gray-500 text-lg">ยังไม่มีรายการจองสอบ</p>
+          </div>
+        `;
+        return;
+      }
+
+      container.innerHTML = '';
+      myBookings.sort((a, b) => new Date(b.created_at) - new Date(a.created_at)).forEach(booking => {
+        const card = document.createElement('div');
+        card.className = 'bg-white rounded-xl shadow-lg p-6';
+        
+        const statusBadge = booking.status === 'completed' 
+          ? '<span class="px-3 py-1 bg-green-100 text-green-700 rounded-full text-sm font-medium">เสร็จสิ้น</span>'
+          : '<span class="px-3 py-1 bg-orange-100 text-orange-700 rounded-full text-sm font-medium">รอสอบ</span>';
+
+        const examDate = new Date(booking.exam_date).toLocaleDateString('th-TH', {
+          year: 'numeric',
+          month: 'long',
+          day: 'numeric'
+        });
+
+        const actions = booking.status === 'pending'
+          ? `
+            <button onclick="startExam('${booking.__backendId}')" class="px-4 py-2 bg-gradient-to-r from-green-600 to-emerald-600 text-white rounded-lg hover:from-green-700 hover:to-emerald-700">
+              บันทึกผล
+            </button>
+            <button onclick="confirmDelete('${booking.__backendId}')" class="px-4 py-2 bg-red-100 text-red-700 rounded-lg hover:bg-red-200">
+              ลบ
+            </button>
+          `
+          : `
+            <button onclick="viewResult('${booking.__backendId}')" class="px-4 py-2 bg-gradient-to-r from-indigo-600 to-purple-600 text-white rounded-lg hover:from-indigo-700 hover:to-purple-700">
+              ดูผลสอบ
+            </button>
+          `;
+
+        card.innerHTML = `
+          <div class="flex items-start justify-between mb-4">
+            <div>
+              <div class="flex items-center gap-3 mb-2">
+                <h3 class="text-xl font-bold text-gray-900">${booking.topic_name}</h3>
+                ${statusBadge}
+              </div>
+              ${booking.subtopic_name ? `<p class="text-indigo-600 font-medium">${booking.subtopic_name}</p>` : ''}
+              <p class="text-gray-600 text-sm mt-2">วันสอบ: ${examDate}</p>
+              <p class="text-gray-600 text-sm">ประเภท: ${booking.exam_type}</p>
+              ${booking.examiner !== '-' ? `<p class="text-gray-600 text-sm">ผู้คุมสอบ: ${booking.examiner}</p>` : ''}
+              ${booking.status === 'completed' && booking.exam_result ? 
+                `<p class="text-lg font-bold mt-2 ${booking.exam_result === 'ผ่าน' ? 'text-green-600' : 'text-red-600'}">
+                  ${booking.exam_result} (${booking.exam_score} คะแนน)
+                </p>` : ''}
+            </div>
+          </div>
+          <div class="flex gap-3 pt-4 border-t">
+            ${actions}
+          </div>
+        `;
+        container.appendChild(card);
+      });
+    }
+
+    function confirmDelete(bookingId) {
+      const deleteConfirm = document.createElement('div');
+      deleteConfirm.className = 'fixed inset-0 bg-black/50 flex items-center justify-center z-[2000] p-6';
+      deleteConfirm.innerHTML = `
+        <div class="bg-white rounded-xl p-6 max-w-sm w-full">
+          <h3 class="text-xl font-bold text-gray-900 mb-2">ยืนยันการลบ</h3>
+          <p class="text-gray-600 mb-6">คุณต้องการลบรายการจองนี้หรือไม่?</p>
+          <div class="flex gap-3">
+            <button onclick="this.closest('.fixed').remove()" class="flex-1 px-4 py-2 bg-gray-200 text-gray-700 rounded-lg hover:bg-gray-300">
+              ยกเลิก
+            </button>
+            <button onclick="deleteBooking('${bookingId}'); this.closest('.fixed').remove()" class="flex-1 px-4 py-2 bg-red-600 text-white rounded-lg hover:bg-red-700">
+              ลบ
+            </button>
+          </div>
+        </div>
+      `;
+      document.body.appendChild(deleteConfirm);
+    }
+
+    function renderAdminBookings() {
+      if (!appState.currentAdmin) return;
+      
+      document.getElementById('admin-name').textContent = appState.currentAdmin.fullName;
+      
+      const container = document.getElementById('admin-bookings-list');
+      
+      // ถ้าเป็น admin123 แสดงรายการทั้งหมด ถ้าไม่ใช่แสดงเฉพาะของตัวเอง
+      const adminBookings = appState.currentAdmin.isExaminer 
+        ? appState.allRecords.filter(r => r.record_type === 'booking' && r.examiner === appState.currentAdmin.fullName)
+        : appState.allRecords.filter(r => r.record_type === 'booking');
+
+      if (adminBookings.length === 0) {
+        container.innerHTML = `
+          <div class="bg-white rounded-xl shadow p-12 text-center">
+            <div class="text-6xl mb-4">📋</div>
+            <p class="text-gray-500 text-lg">ยังไม่มีนักศึกษาจองสอบกับคุณ</p>
+          </div>
+        `;
+        return;
+      }
+
+      container.innerHTML = '';
+      adminBookings.sort((a, b) => {
+        if (a.status !== b.status) {
+          return a.status === 'pending' ? -1 : 1;
+        }
+        return new Date(b.created_at) - new Date(a.created_at);
+      }).forEach(booking => {
+        const card = document.createElement('div');
+        card.className = 'bg-white rounded-xl shadow-lg p-6';
+        
+        const statusBadge = booking.status === 'completed' 
+          ? '<span class="px-3 py-1 bg-green-100 text-green-700 rounded-full text-sm font-medium">เสร็จสิ้น</span>'
+          : '<span class="px-3 py-1 bg-orange-100 text-orange-700 rounded-full text-sm font-medium">รอบันทึกผล</span>';
+
+        const examDate = new Date(booking.exam_date).toLocaleDateString('th-TH', {
+          year: 'numeric',
+          month: 'long',
+          day: 'numeric'
+        });
+
+        const actions = booking.status === 'pending'
+          ? `
+            <button onclick="adminStartExam('${booking.__backendId}')" class="px-4 py-2 bg-gradient-to-r from-green-600 to-emerald-600 text-white rounded-lg hover:from-green-700 hover:to-emerald-700">
+              บันทึกผลสอบ
+            </button>
+          `
+          : `
+            <button onclick="adminViewResult('${booking.__backendId}')" class="px-4 py-2 bg-gradient-to-r from-purple-600 to-pink-600 text-white rounded-lg hover:from-purple-700 hover:to-pink-700">
+              ดูผลสอบ
+            </button>
+          `;
+
+        card.innerHTML = `
+          <div class="flex items-start justify-between mb-4">
+            <div class="flex-1">
+              <div class="flex items-center gap-3 mb-2">
+                <h3 class="text-xl font-bold text-gray-900">${booking.full_name}</h3>
+                ${statusBadge}
+              </div>
+              <p class="text-gray-600 text-sm mb-1">📧 ${booking.email}</p>
+              <p class="text-indigo-600 font-medium">${booking.topic_name}</p>
+              ${booking.subtopic_name ? `<p class="text-sm text-gray-600">• ${booking.subtopic_name}</p>` : ''}
+              <p class="text-gray-600 text-sm mt-2">📅 วันสอบ: ${examDate}</p>
+              <p class="text-gray-600 text-sm">📝 ประเภท: ${booking.exam_type}</p>
+              ${booking.status === 'completed' && booking.exam_result ? 
+                `<p class="text-lg font-bold mt-2 ${booking.exam_result === 'ผ่าน' ? 'text-green-600' : 'text-red-600'}">
+                  ผล: ${booking.exam_result} (${booking.exam_score} คะแนน)
+                </p>` : ''}
+            </div>
+          </div>
+          <div class="flex gap-3 pt-4 border-t">
+            ${actions}
+          </div>
+        `;
+        container.appendChild(card);
+      });
+    }
+
+    function adminStartExam(bookingId) {
+      appState.currentBookingId = bookingId;
+      const booking = appState.allRecords.find(r => r.__backendId === bookingId);
+      if (!booking) return;
+
+      const examDate = new Date(booking.exam_date).toLocaleDateString('th-TH');
+      
+      document.getElementById('exam-info').innerHTML = `
+        <div class="grid grid-cols-2 gap-4">
+          <div>
+            <p class="text-gray-500 text-sm">ผู้เข้าสอบ</p>
+            <p class="font-bold">${booking.full_name}</p>
+          </div>
+          <div>
+            <p class="text-gray-500 text-sm">อีเมล</p>
+            <p class="font-bold">${booking.email}</p>
+          </div>
+          <div>
+            <p class="text-gray-500 text-sm">หัวข้อสอบ</p>
+            <p class="font-bold">${booking.topic_name}</p>
+          </div>
+          ${booking.subtopic_name ? `
+          <div>
+            <p class="text-gray-500 text-sm">หัวข้อย่อย</p>
+            <p class="font-bold text-indigo-600">${booking.subtopic_name}</p>
+          </div>` : ''}
+          <div>
+            <p class="text-gray-500 text-sm">วันสอบ</p>
+            <p class="font-bold">${examDate}</p>
+          </div>
+          <div>
+            <p class="text-gray-500 text-sm">ผู้คุมสอบ</p>
+            <p class="font-bold text-purple-600">${booking.examiner}</p>
+          </div>
+        </div>
+      `;
+
+      // Enable form
+      document.getElementById('exam-form').reset();
+      document.querySelectorAll('#exam-form input, #exam-form textarea, #exam-form button').forEach(el => el.disabled = false);
+      document.getElementById('exam-btn').textContent = 'บันทึกผลการสอบ';
+      document.getElementById('exam-error').classList.add('hidden');
+      showPage('exam');
+    }
+
+    function adminViewResult(bookingId) {
+      appState.currentBookingId = bookingId;
+      const booking = appState.allRecords.find(r => r.__backendId === bookingId);
+      if (!booking) return;
+
+      const examDate = new Date(booking.exam_date).toLocaleDateString('th-TH');
+      
+      document.getElementById('exam-info').innerHTML = `
+        <div class="bg-purple-50 border-2 border-purple-200 rounded-xl p-4 mb-4">
+          <p class="font-bold text-purple-900 mb-2">ผลการสอบที่บันทึกแล้ว</p>
+          <p class="text-2xl font-bold ${booking.exam_result === 'ผ่าน' ? 'text-green-600' : 'text-red-600'}">
+            ${booking.exam_result} (${booking.exam_score} คะแนน)
+          </p>
+        </div>
+        <div class="grid grid-cols-2 gap-4">
+          <div>
+            <p class="text-gray-500 text-sm">ผู้เข้าสอบ</p>
+            <p class="font-bold">${booking.full_name}</p>
+          </div>
+          <div>
+            <p class="text-gray-500 text-sm">อีเมล</p>
+            <p class="font-bold">${booking.email}</p>
+          </div>
+          <div>
+            <p class="text-gray-500 text-sm">หัวข้อสอบ</p>
+            <p class="font-bold">${booking.topic_name}</p>
+          </div>
+          ${booking.subtopic_name ? `
+          <div>
+            <p class="text-gray-500 text-sm">หัวข้อย่อย</p>
+            <p class="font-bold text-indigo-600">${booking.subtopic_name}</p>
+          </div>` : ''}
+          <div>
+            <p class="text-gray-500 text-sm">วันสอบ</p>
+            <p class="font-bold">${examDate}</p>
+          </div>
+          <div>
+            <p class="text-gray-500 text-sm">ผู้คุมสอบ</p>
+            <p class="font-bold text-purple-600">${booking.examiner}</p>
+          </div>
+          ${booking.examiner_notes ? `
+          <div class="col-span-2">
+            <p class="text-gray-500 text-sm">บันทึกเพิ่มเติม</p>
+            <p class="text-gray-700">${booking.examiner_notes}</p>
+          </div>` : ''}
+        </div>
+      `;
+
+      // Show form in read-only mode
+      document.querySelector(`input[name="exam-result"][value="${booking.exam_result}"]`).checked = true;
+      document.getElementById('exam-score').value = booking.exam_score;
+      document.getElementById('exam-notes').value = booking.examiner_notes || '';
+      
+      // Disable form
+      document.querySelectorAll('#exam-form input, #exam-form textarea').forEach(el => el.disabled = true);
+      document.getElementById('exam-btn').disabled = true;
+      document.getElementById('exam-btn').textContent = 'ผลสอบถูกบันทึกแล้ว';
+
+      showPage('exam');
+    }
+
+    async function deleteBooking(bookingId) {
+      const booking = appState.allRecords.find(r => r.__backendId === bookingId);
+      if (!booking || !window.dataSdk) return;
+
+      const result = await window.dataSdk.delete(booking);
+      if (result.isOk) {
+        showToast('ลบรายการสำเร็จ', 'success');
+      } else {
+        showToast('เกิดข้อผิดพลาด', 'error');
+      }
+    }
+
+    function startExam(bookingId) {
+      appState.currentBookingId = bookingId;
+      const booking = appState.allRecords.find(r => r.__backendId === bookingId);
+      if (!booking) return;
+
+      const examDate = new Date(booking.exam_date).toLocaleDateString('th-TH');
+      
+      document.getElementById('exam-info').innerHTML = `
+        <div class="grid grid-cols-2 gap-4">
+          <div>
+            <p class="text-gray-500 text-sm">ผู้เข้าสอบ</p>
+            <p class="font-bold">${booking.full_name}</p>
+          </div>
+          <div>
+            <p class="text-gray-500 text-sm">หัวข้อสอบ</p>
+            <p class="font-bold">${booking.topic_name}</p>
+          </div>
+          ${booking.subtopic_name ? `
+          <div>
+            <p class="text-gray-500 text-sm">หัวข้อย่อย</p>
+            <p class="font-bold text-indigo-600">${booking.subtopic_name}</p>
+          </div>` : ''}
+          <div>
+            <p class="text-gray-500 text-sm">วันสอบ</p>
+            <p class="font-bold">${examDate}</p>
+          </div>
+        </div>
+      `;
+
+      document.getElementById('exam-form').reset();
+      document.querySelectorAll('#exam-form input, #exam-form textarea, #exam-form button').forEach(el => el.disabled = false);
+      document.getElementById('exam-btn').textContent = 'บันทึกผลการสอบ';
+      document.getElementById('exam-error').classList.add('hidden');
+      showPage('exam');
+    }
+
+    function viewResult(bookingId) {
+      appState.currentBookingId = bookingId;
+      const booking = appState.allRecords.find(r => r.__backendId === bookingId);
+      if (!booking) return;
+
+      const examDate = new Date(booking.exam_date).toLocaleDateString('th-TH');
+      
+      document.getElementById('exam-info').innerHTML = `
+        <div class="bg-indigo-50 border-2 border-indigo-200 rounded-xl p-4 mb-4">
+          <p class="font-bold text-indigo-900 mb-2">ผลการสอบที่บันทึกแล้ว</p>
+          <p class="text-2xl font-bold ${booking.exam_result === 'ผ่าน' ? 'text-green-600' : 'text-red-600'}">
+            ${booking.exam_result} (${booking.exam_score} คะแนน)
+          </p>
+        </div>
+        <div class="grid grid-cols-2 gap-4">
+          <div>
+            <p class="text-gray-500 text-sm">ผู้เข้าสอบ</p>
+            <p class="font-bold">${booking.full_name}</p>
+          </div>
+          <div>
+            <p class="text-gray-500 text-sm">หัวข้อสอบ</p>
+            <p class="font-bold">${booking.topic_name}</p>
+          </div>
+          ${booking.subtopic_name ? `
+          <div>
+            <p class="text-gray-500 text-sm">หัวข้อย่อย</p>
+            <p class="font-bold text-indigo-600">${booking.subtopic_name}</p>
+          </div>` : ''}
+          <div>
+            <p class="text-gray-500 text-sm">วันสอบ</p>
+            <p class="font-bold">${examDate}</p>
+          </div>
+          ${booking.examiner_notes ? `
+          <div class="col-span-2">
+            <p class="text-gray-500 text-sm">บันทึกเพิ่มเติม</p>
+            <p class="text-gray-700">${booking.examiner_notes}</p>
+          </div>` : ''}
+        </div>
+      `;
+
+      // Show form in read-only mode
+      document.querySelector(`input[name="exam-result"][value="${booking.exam_result}"]`).checked = true;
+      document.getElementById('exam-score').value = booking.exam_score;
+      document.getElementById('exam-notes').value = booking.examiner_notes || '';
+      
+      // Disable form
+      document.querySelectorAll('#exam-form input, #exam-form textarea').forEach(el => el.disabled = true);
+      document.getElementById('exam-btn').disabled = true;
+      document.getElementById('exam-btn').textContent = 'ผลสอบถูกบันทึกแล้ว';
+
+      showPage('exam');
+    }
+
+    function renderSummary() {
+      const container = document.getElementById('summary-content');
+      const myBookings = appState.allRecords.filter(
+        r => r.record_type === 'booking' && r.user_id === appState.currentUser?.user_id
+      );
+      const completed = myBookings.filter(b => b.status === 'completed');
+      
+      const total = completed.length;
+      const passed = completed.filter(b => b.exam_result === 'ผ่าน').length;
+      const failed = completed.filter(b => b.exam_result === 'ไม่ผ่าน').length;
+      const retake = completed.filter(b => b.exam_result === 'ต้องสอบซ่อม').length;
+      const pending = myBookings.filter(b => b.status === 'pending').length;
+      
+      const avgScore = total > 0 
+        ? (completed.reduce((sum, b) => sum + parseFloat(b.exam_score || 0), 0) / total).toFixed(2)
+        : 0;
+
+      if (myBookings.length === 0) {
+        container.innerHTML = `
+          <div class="bg-white rounded-xl shadow p-12 text-center">
+            <div class="text-6xl mb-4">📊</div>
+            <p class="text-gray-500 text-lg">ยังไม่มีข้อมูลการสอบ</p>
+          </div>
+        `;
+        return;
+      }
+
+      container.innerHTML = `
+        <div class="grid md:grid-cols-4 gap-6 mb-8">
+          <div class="bg-white rounded-xl shadow-lg p-6">
+            <div class="text-4xl font-bold text-indigo-600 mb-2">${total}</div>
+            <p class="text-gray-600">จำนวนครั้งที่สอบ</p>
+          </div>
+          <div class="bg-white rounded-xl shadow-lg p-6">
+            <div class="text-4xl font-bold text-green-600 mb-2">${passed}</div>
+            <p class="text-gray-600">ผ่าน</p>
+          </div>
+          <div class="bg-white rounded-xl shadow-lg p-6">
+            <div class="text-4xl font-bold text-red-600 mb-2">${failed + retake}</div>
+            <p class="text-gray-600">ไม่ผ่าน/สอบซ่อม</p>
+          </div>
+          <div class="bg-white rounded-xl shadow-lg p-6">
+            <div class="text-4xl font-bold text-purple-600 mb-2">${avgScore}</div>
+            <p class="text-gray-600">คะแนนเฉลี่ย</p>
+          </div>
+        </div>
+
+        <div class="bg-white rounded-xl shadow-lg p-6">
+          <h3 class="text-xl font-bold text-gray-900 mb-4">ประวัติการสอบ</h3>
+          <div class="overflow-x-auto">
+            <table class="w-full">
+              <thead class="bg-gray-50">
+                <tr>
+                  <th class="px-4 py-3 text-left text-sm font-medium text-gray-700">วันที่</th>
+                  <th class="px-4 py-3 text-left text-sm font-medium text-gray-700">หัวข้อ</th>
+                  <th class="px-4 py-3 text-left text-sm font-medium text-gray-700">ผล</th>
+                  <th class="px-4 py-3 text-center text-sm font-medium text-gray-700">คะแนน</th>
+                </tr>
+              </thead>
+              <tbody class="divide-y divide-gray-200">
+                ${completed.length > 0 ? completed.map(exam => {
+                  const date = new Date(exam.exam_date).toLocaleDateString('th-TH', {
+                    day: '2-digit',
+                    month: 'short',
+                    year: 'numeric'
+                  });
+                  return `
+                    <tr class="hover:bg-gray-50">
+                      <td class="px-4 py-3 text-sm text-gray-600">${date}</td>
+                      <td class="px-4 py-3 text-sm">
+                        <div class="font-medium text-gray-900">${exam.topic_name}</div>
+                        ${exam.subtopic_name ? `<div class="text-xs text-gray-500">${exam.subtopic_name}</div>` : ''}
+                      </td>
+                      <td class="px-4 py-3">
+                        <span class="px-3 py-1 rounded-full text-xs font-medium ${
+                          exam.exam_result === 'ผ่าน' ? 'bg-green-100 text-green-700' :
+                          exam.exam_result === 'ไม่ผ่าน' ? 'bg-red-100 text-red-700' :
+                          'bg-yellow-100 text-yellow-700'
+                        }">
+                          ${exam.exam_result}
+                        </span>
+                      </td>
+                      <td class="px-4 py-3 text-center">
+                        <span class="text-lg font-bold ${
+                          parseFloat(exam.exam_score) >= 60 ? 'text-green-600' : 'text-red-600'
+                        }">
+                          ${exam.exam_score}
+                        </span>
+                      </td>
+                    </tr>
+                  `;
+                }).join('') : `
+                  <tr>
+                    <td colspan="4" class="px-4 py-8 text-center text-gray-500">ยังไม่มีข้อมูล</td>
+                  </tr>
+                `}
+              </tbody>
+            </table>
+          </div>
+        </div>
+      `;
+    }
+
+    // Form Handlers
+    document.addEventListener('DOMContentLoaded', () => {
+      // Register Form
+      document.getElementById('register-form').addEventListener('submit', async (e) => {
+        e.preventDefault();
+        
+        const name = document.getElementById('reg-name').value.trim();
+        const email = document.getElementById('reg-email').value.trim().toLowerCase();
+        const password = document.getElementById('reg-password').value;
+        const confirm = document.getElementById('reg-confirm').value;
+        
+        const errorDiv = document.getElementById('reg-error');
+        const btn = document.getElementById('reg-btn');
+
+        if (password !== confirm) {
+          errorDiv.textContent = 'รหัสผ่านไม่ตรงกัน';
+          errorDiv.classList.remove('hidden');
+          return;
+        }
+
+        const exists = appState.allRecords.find(r => r.record_type === 'user' && r.email === email);
+        if (exists) {
+          errorDiv.textContent = 'อีเมลนี้ถูกใช้งานแล้ว';
+          errorDiv.classList.remove('hidden');
+          return;
+        }
+
+        if (appState.allRecords.filter(r => r.record_type === 'user').length >= 999) {
+          errorDiv.textContent = 'ถึงขีดจำกัดผู้ใช้งาน';
+          errorDiv.classList.remove('hidden');
+          return;
+        }
+
+        btn.disabled = true;
+        btn.textContent = 'กำลังลงทะเบียน...';
+        errorDiv.classList.add('hidden');
+
+        if (window.dataSdk) {
+          const userId = 'user_' + Date.now();
+          const result = await window.dataSdk.create({
+            record_type: 'user',
+            user_id: userId,
+            full_name: name,
+            email: email,
+            password: password,
+            created_at: new Date().toISOString()
+          });
+
+          if (result.isOk) {
+            showToast('ลงทะเบียนสำเร็จ', 'success');
+            setTimeout(() => showPage('login'), 1000);
+          } else {
+            errorDiv.textContent = 'เกิดข้อผิดพลาด';
+            errorDiv.classList.remove('hidden');
+          }
+        }
+
+        btn.disabled = false;
+        btn.textContent = 'ลงทะเบียน';
+      });
+
+      // Login Form
+      document.getElementById('login-form').addEventListener('submit', async (e) => {
+        e.preventDefault();
+        
+        const email = document.getElementById('login-email').value.trim().toLowerCase();
+        const password = document.getElementById('login-password').value;
+        
+        const errorDiv = document.getElementById('login-error');
+        const btn = document.getElementById('login-btn');
+
+        btn.disabled = true;
+        btn.textContent = 'กำลังเข้าสู่ระบบ...';
+        errorDiv.classList.add('hidden');
+
+        const user = appState.allRecords.find(
+          r => r.record_type === 'user' && r.email === email && r.password === password
+        );
+
+        if (user) {
+          appState.currentUser = user;
+          localStorage.setItem('crb_session', JSON.stringify({ user_id: user.user_id }));
+          showToast('เข้าสู่ระบบสำเร็จ', 'success');
+          updateDashboard();
+          setTimeout(() => showPage('dashboard'), 500);
+        } else {
+          errorDiv.textContent = 'อีเมลหรือรหัสผ่านไม่ถูกต้อง';
+          errorDiv.classList.remove('hidden');
+        }
+
+        btn.disabled = false;
+        btn.textContent = 'เข้าสู่ระบบ';
+      });
+
+      // Admin Login Form
+      document.getElementById('admin-login-form').addEventListener('submit', async (e) => {
+        e.preventDefault();
+        
+        const username = document.getElementById('admin-username').value.trim().toLowerCase();
+        const password = document.getElementById('admin-password').value;
+        
+        const errorDiv = document.getElementById('admin-login-error');
+        const btn = document.getElementById('admin-login-btn');
+
+        btn.disabled = true;
+        btn.textContent = 'กำลังตรวจสอบ...';
+        errorDiv.classList.add('hidden');
+
+        const admin = ADMIN_ACCOUNTS[username];
+        if (admin && admin.password === password) {
+          appState.currentAdmin = admin;
+          localStorage.setItem('crb_admin_session', JSON.stringify({ username: admin.username }));
+          showToast('เข้าสู่ระบบอาจารย์สำเร็จ', 'success');
+          setTimeout(() => showPage('admin-dashboard'), 500);
+        } else {
+          errorDiv.textContent = 'ชื่อผู้ใช้หรือรหัสผ่านไม่ถูกต้อง';
+          errorDiv.classList.remove('hidden');
+        }
+
+        btn.disabled = false;
+        btn.textContent = 'เข้าสู่ระบบอาจารย์';
+      });
+
+      // Booking Form
+      document.getElementById('booking-form').addEventListener('submit', async (e) => {
+        e.preventDefault();
+        
+        const examType = document.querySelector('input[name="exam-type"]:checked')?.value;
+        const examDate = document.getElementById('exam-date').value;
+        const examiner = document.getElementById('examiner-select').value || '-';
+        
+        const errorDiv = document.getElementById('booking-error');
+        const btn = document.getElementById('booking-btn');
+
+        if (!appState.currentUser || !appState.selectedTopicId) {
+          errorDiv.textContent = 'ข้อมูลไม่ครบถ้วน';
+          errorDiv.classList.remove('hidden');
+          return;
+        }
+
+        if (appState.allRecords.filter(r => r.record_type === 'booking').length >= 999) {
+          errorDiv.textContent = 'ถึงขีดจำกัดการจอง';
+          errorDiv.classList.remove('hidden');
+          return;
+        }
+
+        btn.disabled = true;
+        btn.textContent = 'กำลังจอง...';
+        errorDiv.classList.add('hidden');
+
+        if (window.dataSdk) {
+          const config = window.elementSdk?.config || defaultConfig;
+          const topicName = config[`topic_${appState.selectedTopicId}_name`] || defaultConfig[`topic_${appState.selectedTopicId}_name`];
+          
+          const result = await window.dataSdk.create({
+            record_type: 'booking',
+            user_id: appState.currentUser.user_id,
+            full_name: appState.currentUser.full_name,
+            email: appState.currentUser.email,
+            topic_id: appState.selectedTopicId,
+            topic_name: topicName,
+            subtopic_name: appState.selectedSubtopic || '',
+            exam_date: examDate,
+            exam_type: examType,
+            examiner: examiner,
+            status: 'pending',
+            exam_result: '',
+            exam_score: '',
+            examiner_notes: '',
+            created_at: new Date().toISOString(),
+            completed_at: ''
+          });
+
+          if (result.isOk) {
+            showToast('จองสอบสำเร็จ', 'success');
+            setTimeout(() => showPage('bookings'), 1000);
+          } else {
+            errorDiv.textContent = 'เกิดข้อผิดพลาด';
+            errorDiv.classList.remove('hidden');
+          }
+        }
+
+        btn.disabled = false;
+        btn.textContent = 'ยืนยันการจอง';
+      });
+
+      // Exam Form
+      document.getElementById('exam-form').addEventListener('submit', async (e) => {
+        e.preventDefault();
+        
+        const result = document.querySelector('input[name="exam-result"]:checked')?.value;
+        const score = document.getElementById('exam-score').value;
+        const notes = document.getElementById('exam-notes').value;
+        
+        const errorDiv = document.getElementById('exam-error');
+        const btn = document.getElementById('exam-btn');
+
+        // Check if admin is logged in for exams with examiner
+        const booking = appState.allRecords.find(r => r.__backendId === appState.currentBookingId);
+        if (booking && booking.examiner !== '-' && !appState.currentAdmin) {
+          errorDiv.textContent = 'เฉพาะอาจารย์ผู้คุมสอบเท่านั้นที่สามารถบันทึกผลได้';
+          errorDiv.classList.remove('hidden');
+          return;
+        }
+        
+        // Check if regular examiner is authorized to edit this booking
+        if (booking && appState.currentAdmin && appState.currentAdmin.isExaminer && 
+            booking.examiner !== '-' && booking.examiner !== appState.currentAdmin.fullName) {
+          errorDiv.textContent = 'คุณไม่มีสิทธิ์บันทึกผลสอบนี้ เนื่องจากไม่ใช่ผู้คุมสอบของรายการนี้';
+          errorDiv.classList.remove('hidden');
+          return;
+        }
+
+        if (!result || !score) {
+          errorDiv.textContent = 'กรุณากรอกข้อมูลให้ครบถ้วน';
+          errorDiv.classList.remove('hidden');
+          return;
+        }
+
+        btn.disabled = true;
+        btn.textContent = 'กำลังบันทึก...';
+        errorDiv.classList.add('hidden');
+
+        if (booking && window.dataSdk) {
+          const updated = {
+            ...booking,
+            status: 'completed',
+            exam_result: result,
+            exam_score: score,
+            examiner_notes: notes,
+            completed_at: new Date().toISOString()
+          };
+
+          const updateResult = await window.dataSdk.update(updated);
+          if (updateResult.isOk) {
+            showToast('บันทึกผลสำเร็จ', 'success');
+            if (appState.currentAdmin) {
+              setTimeout(() => showPage('admin-dashboard'), 1000);
+            } else {
+              setTimeout(() => showPage('bookings'), 1000);
+            }
+          } else {
+            errorDiv.textContent = 'เกิดข้อผิดพลาด';
+            errorDiv.classList.remove('hidden');
+          }
+        }
+
+        btn.disabled = false;
+        btn.textContent = 'บันทึกผลการสอบ';
+      });
+    });
+
+    // Initialize App
+    async function initApp() {
+      if (window.dataSdk) {
+        const initResult = await window.dataSdk.init(dataHandler);
+        if (!initResult.isOk) {
+          console.error('Failed to initialize Data SDK');
+        }
+      }
+
+      // Check session
+      const session = localStorage.getItem('crb_session');
+      if (session) {
+        try {
+          const { user_id } = JSON.parse(session);
+          const user = appState.allRecords.find(r => r.record_type === 'user' && r.user_id === user_id);
+          if (user) {
+            appState.currentUser = user;
+            updateDashboard();
+            showPage('dashboard');
+            return;
+          }
+        } catch (e) {
+          localStorage.removeItem('crb_session');
+        }
+      }
+
+      // Check admin session
+      const adminSession = localStorage.getItem('crb_admin_session');
+      if (adminSession) {
+        try {
+          const { username } = JSON.parse(adminSession);
+          const admin = ADMIN_ACCOUNTS[username];
+          if (admin) {
+            appState.currentAdmin = admin;
+            showPage('admin-dashboard');
+            return;
+          }
+        } catch (e) {
+          localStorage.removeItem('crb_admin_session');
+        }
+      }
+
+      // Update editable text
+      const config = window.elementSdk?.config || defaultConfig;
+      document.getElementById('title-main').textContent = config.app_title || defaultConfig.app_title;
+      document.getElementById('welcome-main').textContent = config.welcome_text || defaultConfig.welcome_text;
+    }
+
+    // Element SDK
+    if (window.elementSdk) {
+      window.elementSdk.init({
+        defaultConfig: defaultConfig,
+        onConfigChange: async (config) => {
+          document.getElementById('title-main').textContent = config.app_title || defaultConfig.app_title;
+          document.getElementById('welcome-main').textContent = config.welcome_text || defaultConfig.welcome_text;
+          
+          // Re-render topics if on topics page
+          const activePage = document.querySelector('.page-container.active');
+          if (activePage && activePage.id === 'topics-page') {
+            renderTopics();
+          }
+        },
+        mapToCapabilities: (config) => ({
+          recolorables: [],
+          borderables: [],
+          fontEditable: undefined,
+          fontSizeable: undefined
+        }),
+        mapToEditPanelValues: (config) => {
+          const map = new Map();
+          Object.keys(config).forEach(key => {
+            map.set(key, config[key] || defaultConfig[key] || '');
+          });
+          return map;
+        }
+      });
+    }
+
+    // Start app
+    if (document.readyState === 'loading') {
+      document.addEventListener('DOMContentLoaded', initApp);
+    } else {
+      initApp();
+    }
+  </script>
+ <script>(function(){function c(){var b=a.contentDocument||a.contentWindow.document;if(b){var d=b.createElement('script');d.innerHTML="window.__CF$cv$params={r:'9bd34595c368ce22',t:'MTc2ODI5MDMwMi4wMDAwMDA='};var a=document.createElement('script');a.nonce='';a.src='/cdn-cgi/challenge-platform/scripts/jsd/main.js';document.getElementsByTagName('head')[0].appendChild(a);";b.getElementsByTagName('head')[0].appendChild(d)}}if(document.body){var a=document.createElement('iframe');a.height=1;a.width=1;a.style.position='absolute';a.style.top=0;a.style.left=0;a.style.border='none';a.style.visibility='hidden';document.body.appendChild(a);if('loading'!==document.readyState)c();else if(window.addEventListener)document.addEventListener('DOMContentLoaded',c);else{var e=document.onreadystatechange||function(){};document.onreadystatechange=function(b){e(b);'loading'!==document.readyState&&(document.onreadystatechange=e,c())}}}})();</script></body>
+</html>
