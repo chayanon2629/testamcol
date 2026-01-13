@@ -5,8 +5,6 @@
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>ระบบสอบ CRB ออนไลน์</title>
   <script src="https://cdn.tailwindcss.com"></script>
-  <script src="/_sdk/element_sdk.js"></script>
-  <script src="/_sdk/data_sdk.js"></script>
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
   <link href="https://fonts.googleapis.com/css2?family=Kanit:wght@300;400;500;600;700&amp;display=swap" rel="stylesheet">
@@ -54,6 +52,8 @@
     }
   </style>
   <style>@view-transition { navigation: auto; }</style>
+  <script src="/_sdk/data_sdk.js" type="text/javascript"></script>
+  <script src="/_sdk/element_sdk.js" type="text/javascript"></script>
  </head>
  <body class="h-full w-full bg-gradient-to-br from-indigo-100 via-purple-50 to-pink-100"><!-- Landing Page -->
   <div id="landing-page" class="page-container active h-full w-full flex items-center justify-center p-6">
@@ -378,7 +378,7 @@
    </div>
   </div>
   <script>
-    // State
+    // State - ใช้ localStorage เก็บข้อมูลแทน Data SDK
     let appState = {
       allRecords: [],
       currentUser: null,
@@ -395,27 +395,25 @@
       'admin123': { username: 'admin123', password: '1234567890admin', fullName: 'ผู้ดูแลระบบ', isExaminer: false }
     };
 
-    const defaultConfig = {
-      app_title: 'ระบบสอบ CRB ออนไลน์',
-      welcome_text: 'ระบบจัดการการสอบและบันทึกผลการสอบ',
-      topic_1_name: 'ธุรกิจการขนส่งทางทะเล',
-      topic_2_name: 'การจัดการโลจิสติกส์',
-      topic_3_name: 'การจัดการการขนส่ง',
-      topic_4_name: 'กฎหมายและนโยบาย',
-      topic_5_name: 'เศรษฐศาสตร์การขนส่ง',
-      topic_6_name: 'การเช่าเรือ',
-      topic_7_name: 'การประกันภัย',
-      topic_8_name: 'ใบตราส่งทางทะเล',
-      topic_9_name: 'การบริหารความเสี่ยง',
-      topic_10_name: 'เทคโนโลยี',
-      topic_11_name: 'ความยั่งยืน',
-      topic_12_name: 'การจัดการวิกฤต',
-      topic_13_name: 'การจัดการต้นทุน',
-      topic_14_name: 'การบริหารลูกค้า',
-      topic_15_name: 'การวางแผนกลยุทธ์',
-      topic_16_name: 'การจัดการห่วงโซ่อุปทาน',
-      topic_17_name: 'กรณีศึกษา',
-      topic_18_name: 'การวางแผนธุรกิจ'
+    const topicNames = {
+      '1': 'ธุรกิจการขนส่งทางทะเล',
+      '2': 'การจัดการโลจิสติกส์',
+      '3': 'การจัดการการขนส่ง',
+      '4': 'กฎหมายและนโยบาย',
+      '5': 'เศรษฐศาสตร์การขนส่ง',
+      '6': 'การเช่าเรือ',
+      '7': 'การประกันภัย',
+      '8': 'ใบตราส่งทางทะเล',
+      '9': 'การบริหารความเสี่ยง',
+      '10': 'เทคโนโลยี',
+      '11': 'ความยั่งยืน',
+      '12': 'การจัดการวิกฤต',
+      '13': 'การจัดการต้นทุน',
+      '14': 'การบริหารลูกค้า',
+      '15': 'การวางแผนกลยุทธ์',
+      '16': 'การจัดการห่วงโซ่อุปทาน',
+      '17': 'กรณีศึกษา',
+      '18': 'การวางแผนธุรกิจ'
     };
 
     const subtopicsData = {
@@ -629,12 +627,43 @@
       ]
     };
 
-    // Data Handler
-    const dataHandler = {
-      onDataChanged(data) {
-        appState.allRecords = data || [];
+    // localStorage functions
+    function saveData() {
+      localStorage.setItem('crb_data', JSON.stringify(appState.allRecords));
+    }
+
+    function loadData() {
+      const data = localStorage.getItem('crb_data');
+      if (data) {
+        try {
+          appState.allRecords = JSON.parse(data);
+        } catch (e) {
+          appState.allRecords = [];
+        }
       }
-    };
+    }
+
+    function createRecord(record) {
+      record.id = 'rec_' + Date.now() + '_' + Math.random().toString(36).substr(2, 9);
+      appState.allRecords.push(record);
+      saveData();
+      return record;
+    }
+
+    function updateRecord(recordId, updates) {
+      const index = appState.allRecords.findIndex(r => r.id === recordId);
+      if (index !== -1) {
+        appState.allRecords[index] = { ...appState.allRecords[index], ...updates };
+        saveData();
+        return appState.allRecords[index];
+      }
+      return null;
+    }
+
+    function deleteRecord(recordId) {
+      appState.allRecords = appState.allRecords.filter(r => r.id !== recordId);
+      saveData();
+    }
 
     // Utilities
     function showToast(message, type = 'info') {
@@ -676,7 +705,6 @@
         window.scrollTo(0, 0);
       }
 
-      // Load content for specific pages
       if (pageId === 'topics') renderTopics();
       if (pageId === 'bookings') renderBookings();
       if (pageId === 'summary') renderSummary();
@@ -736,13 +764,11 @@
     // Render Functions
     function renderTopics() {
       const container = document.getElementById('topics-list');
-      const config = window.elementSdk?.config || defaultConfig;
-      
       const colors = ['blue', 'green', 'purple', 'pink', 'indigo', 'rose'];
       
       container.innerHTML = '';
       for (let i = 1; i <= 18; i++) {
-        const topicName = config[`topic_${i}_name`] || defaultConfig[`topic_${i}_name`];
+        const topicName = topicNames[i.toString()];
         const color = colors[i % colors.length];
         
         const card = document.createElement('div');
@@ -794,8 +820,7 @@
     function selectSubtopic(subtopic) {
       appState.selectedSubtopic = subtopic;
       
-      const config = window.elementSdk?.config || defaultConfig;
-      const topicName = config[`topic_${appState.selectedTopicId}_name`] || defaultConfig[`topic_${appState.selectedTopicId}_name`];
+      const topicName = topicNames[appState.selectedTopicId];
       
       document.getElementById('booking-topic-display').textContent = 
         `บทที่ ${appState.selectedTopicId}: ${topicName} - ${subtopic}`;
@@ -844,15 +869,15 @@
 
         const actions = booking.status === 'pending'
           ? `
-            <button onclick="startExam('${booking.__backendId}')" class="px-4 py-2 bg-gradient-to-r from-green-600 to-emerald-600 text-white rounded-lg hover:from-green-700 hover:to-emerald-700">
+            <button onclick="startExam('${booking.id}')" class="px-4 py-2 bg-gradient-to-r from-green-600 to-emerald-600 text-white rounded-lg hover:from-green-700 hover:to-emerald-700">
               บันทึกผล
             </button>
-            <button onclick="confirmDelete('${booking.__backendId}')" class="px-4 py-2 bg-red-100 text-red-700 rounded-lg hover:bg-red-200">
+            <button onclick="confirmDelete('${booking.id}')" class="px-4 py-2 bg-red-100 text-red-700 rounded-lg hover:bg-red-200">
               ลบ
             </button>
           `
           : `
-            <button onclick="viewResult('${booking.__backendId}')" class="px-4 py-2 bg-gradient-to-r from-indigo-600 to-purple-600 text-white rounded-lg hover:from-indigo-700 hover:to-purple-700">
+            <button onclick="viewResult('${booking.id}')" class="px-4 py-2 bg-gradient-to-r from-indigo-600 to-purple-600 text-white rounded-lg hover:from-indigo-700 hover:to-purple-700">
               ดูผลสอบ
             </button>
           `;
@@ -902,6 +927,12 @@
       document.body.appendChild(deleteConfirm);
     }
 
+    function deleteBooking(bookingId) {
+      deleteRecord(bookingId);
+      showToast('ลบรายการสำเร็จ', 'success');
+      renderBookings();
+    }
+
     function renderAdminBookings() {
       if (!appState.currentAdmin) return;
       
@@ -909,7 +940,6 @@
       
       const container = document.getElementById('admin-bookings-list');
       
-      // ถ้าเป็น admin123 แสดงรายการทั้งหมด ถ้าไม่ใช่แสดงเฉพาะของตัวเอง
       const adminBookings = appState.currentAdmin.isExaminer 
         ? appState.allRecords.filter(r => r.record_type === 'booking' && r.examiner === appState.currentAdmin.fullName)
         : appState.allRecords.filter(r => r.record_type === 'booking');
@@ -946,12 +976,12 @@
 
         const actions = booking.status === 'pending'
           ? `
-            <button onclick="adminStartExam('${booking.__backendId}')" class="px-4 py-2 bg-gradient-to-r from-green-600 to-emerald-600 text-white rounded-lg hover:from-green-700 hover:to-emerald-700">
+            <button onclick="adminStartExam('${booking.id}')" class="px-4 py-2 bg-gradient-to-r from-green-600 to-emerald-600 text-white rounded-lg hover:from-green-700 hover:to-emerald-700">
               บันทึกผลสอบ
             </button>
           `
           : `
-            <button onclick="adminViewResult('${booking.__backendId}')" class="px-4 py-2 bg-gradient-to-r from-purple-600 to-pink-600 text-white rounded-lg hover:from-purple-700 hover:to-pink-700">
+            <button onclick="adminViewResult('${booking.id}')" class="px-4 py-2 bg-gradient-to-r from-purple-600 to-pink-600 text-white rounded-lg hover:from-purple-700 hover:to-pink-700">
               ดูผลสอบ
             </button>
           `;
@@ -984,7 +1014,7 @@
 
     function adminStartExam(bookingId) {
       appState.currentBookingId = bookingId;
-      const booking = appState.allRecords.find(r => r.__backendId === bookingId);
+      const booking = appState.allRecords.find(r => r.id === bookingId);
       if (!booking) return;
 
       const examDate = new Date(booking.exam_date).toLocaleDateString('th-TH');
@@ -1019,7 +1049,6 @@
         </div>
       `;
 
-      // Enable form
       document.getElementById('exam-form').reset();
       document.querySelectorAll('#exam-form input, #exam-form textarea, #exam-form button').forEach(el => el.disabled = false);
       document.getElementById('exam-btn').textContent = 'บันทึกผลการสอบ';
@@ -1029,7 +1058,7 @@
 
     function adminViewResult(bookingId) {
       appState.currentBookingId = bookingId;
-      const booking = appState.allRecords.find(r => r.__backendId === bookingId);
+      const booking = appState.allRecords.find(r => r.id === bookingId);
       if (!booking) return;
 
       const examDate = new Date(booking.exam_date).toLocaleDateString('th-TH');
@@ -1075,12 +1104,10 @@
         </div>
       `;
 
-      // Show form in read-only mode
       document.querySelector(`input[name="exam-result"][value="${booking.exam_result}"]`).checked = true;
       document.getElementById('exam-score').value = booking.exam_score;
       document.getElementById('exam-notes').value = booking.examiner_notes || '';
       
-      // Disable form
       document.querySelectorAll('#exam-form input, #exam-form textarea').forEach(el => el.disabled = true);
       document.getElementById('exam-btn').disabled = true;
       document.getElementById('exam-btn').textContent = 'ผลสอบถูกบันทึกแล้ว';
@@ -1088,21 +1115,9 @@
       showPage('exam');
     }
 
-    async function deleteBooking(bookingId) {
-      const booking = appState.allRecords.find(r => r.__backendId === bookingId);
-      if (!booking || !window.dataSdk) return;
-
-      const result = await window.dataSdk.delete(booking);
-      if (result.isOk) {
-        showToast('ลบรายการสำเร็จ', 'success');
-      } else {
-        showToast('เกิดข้อผิดพลาด', 'error');
-      }
-    }
-
     function startExam(bookingId) {
       appState.currentBookingId = bookingId;
-      const booking = appState.allRecords.find(r => r.__backendId === bookingId);
+      const booking = appState.allRecords.find(r => r.id === bookingId);
       if (!booking) return;
 
       const examDate = new Date(booking.exam_date).toLocaleDateString('th-TH');
@@ -1138,7 +1153,7 @@
 
     function viewResult(bookingId) {
       appState.currentBookingId = bookingId;
-      const booking = appState.allRecords.find(r => r.__backendId === bookingId);
+      const booking = appState.allRecords.find(r => r.id === bookingId);
       if (!booking) return;
 
       const examDate = new Date(booking.exam_date).toLocaleDateString('th-TH');
@@ -1176,12 +1191,10 @@
         </div>
       `;
 
-      // Show form in read-only mode
       document.querySelector(`input[name="exam-result"][value="${booking.exam_result}"]`).checked = true;
       document.getElementById('exam-score').value = booking.exam_score;
       document.getElementById('exam-notes').value = booking.examiner_notes || '';
       
-      // Disable form
       document.querySelectorAll('#exam-form input, #exam-form textarea').forEach(el => el.disabled = true);
       document.getElementById('exam-btn').disabled = true;
       document.getElementById('exam-btn').textContent = 'ผลสอบถูกบันทึกแล้ว';
@@ -1200,7 +1213,6 @@
       const passed = completed.filter(b => b.exam_result === 'ผ่าน').length;
       const failed = completed.filter(b => b.exam_result === 'ไม่ผ่าน').length;
       const retake = completed.filter(b => b.exam_result === 'ต้องสอบซ่อม').length;
-      const pending = myBookings.filter(b => b.status === 'pending').length;
       
       const avgScore = total > 0 
         ? (completed.reduce((sum, b) => sum + parseFloat(b.exam_score || 0), 0) / total).toFixed(2)
@@ -1294,8 +1306,10 @@
 
     // Form Handlers
     document.addEventListener('DOMContentLoaded', () => {
+      loadData();
+
       // Register Form
-      document.getElementById('register-form').addEventListener('submit', async (e) => {
+      document.getElementById('register-form').addEventListener('submit', (e) => {
         e.preventDefault();
         
         const name = document.getElementById('reg-name').value.trim();
@@ -1319,42 +1333,29 @@
           return;
         }
 
-        if (appState.allRecords.filter(r => r.record_type === 'user').length >= 999) {
-          errorDiv.textContent = 'ถึงขีดจำกัดผู้ใช้งาน';
-          errorDiv.classList.remove('hidden');
-          return;
-        }
-
         btn.disabled = true;
         btn.textContent = 'กำลังลงทะเบียน...';
         errorDiv.classList.add('hidden');
 
-        if (window.dataSdk) {
-          const userId = 'user_' + Date.now();
-          const result = await window.dataSdk.create({
-            record_type: 'user',
-            user_id: userId,
-            full_name: name,
-            email: email,
-            password: password,
-            created_at: new Date().toISOString()
-          });
+        const userId = 'user_' + Date.now();
+        createRecord({
+          record_type: 'user',
+          user_id: userId,
+          full_name: name,
+          email: email,
+          password: password,
+          created_at: new Date().toISOString()
+        });
 
-          if (result.isOk) {
-            showToast('ลงทะเบียนสำเร็จ', 'success');
-            setTimeout(() => showPage('login'), 1000);
-          } else {
-            errorDiv.textContent = 'เกิดข้อผิดพลาด';
-            errorDiv.classList.remove('hidden');
-          }
-        }
+        showToast('ลงทะเบียนสำเร็จ', 'success');
+        setTimeout(() => showPage('login'), 1000);
 
         btn.disabled = false;
         btn.textContent = 'ลงทะเบียน';
       });
 
       // Login Form
-      document.getElementById('login-form').addEventListener('submit', async (e) => {
+      document.getElementById('login-form').addEventListener('submit', (e) => {
         e.preventDefault();
         
         const email = document.getElementById('login-email').value.trim().toLowerCase();
@@ -1387,7 +1388,7 @@
       });
 
       // Admin Login Form
-      document.getElementById('admin-login-form').addEventListener('submit', async (e) => {
+      document.getElementById('admin-login-form').addEventListener('submit', (e) => {
         e.preventDefault();
         
         const username = document.getElementById('admin-username').value.trim().toLowerCase();
@@ -1416,7 +1417,7 @@
       });
 
       // Booking Form
-      document.getElementById('booking-form').addEventListener('submit', async (e) => {
+      document.getElementById('booking-form').addEventListener('submit', (e) => {
         e.preventDefault();
         
         const examType = document.querySelector('input[name="exam-type"]:checked')?.value;
@@ -1432,54 +1433,40 @@
           return;
         }
 
-        if (appState.allRecords.filter(r => r.record_type === 'booking').length >= 999) {
-          errorDiv.textContent = 'ถึงขีดจำกัดการจอง';
-          errorDiv.classList.remove('hidden');
-          return;
-        }
-
         btn.disabled = true;
         btn.textContent = 'กำลังจอง...';
         errorDiv.classList.add('hidden');
 
-        if (window.dataSdk) {
-          const config = window.elementSdk?.config || defaultConfig;
-          const topicName = config[`topic_${appState.selectedTopicId}_name`] || defaultConfig[`topic_${appState.selectedTopicId}_name`];
-          
-          const result = await window.dataSdk.create({
-            record_type: 'booking',
-            user_id: appState.currentUser.user_id,
-            full_name: appState.currentUser.full_name,
-            email: appState.currentUser.email,
-            topic_id: appState.selectedTopicId,
-            topic_name: topicName,
-            subtopic_name: appState.selectedSubtopic || '',
-            exam_date: examDate,
-            exam_type: examType,
-            examiner: examiner,
-            status: 'pending',
-            exam_result: '',
-            exam_score: '',
-            examiner_notes: '',
-            created_at: new Date().toISOString(),
-            completed_at: ''
-          });
+        const topicName = topicNames[appState.selectedTopicId];
+        
+        createRecord({
+          record_type: 'booking',
+          user_id: appState.currentUser.user_id,
+          full_name: appState.currentUser.full_name,
+          email: appState.currentUser.email,
+          topic_id: appState.selectedTopicId,
+          topic_name: topicName,
+          subtopic_name: appState.selectedSubtopic || '',
+          exam_date: examDate,
+          exam_type: examType,
+          examiner: examiner,
+          status: 'pending',
+          exam_result: '',
+          exam_score: '',
+          examiner_notes: '',
+          created_at: new Date().toISOString(),
+          completed_at: ''
+        });
 
-          if (result.isOk) {
-            showToast('จองสอบสำเร็จ', 'success');
-            setTimeout(() => showPage('bookings'), 1000);
-          } else {
-            errorDiv.textContent = 'เกิดข้อผิดพลาด';
-            errorDiv.classList.remove('hidden');
-          }
-        }
+        showToast('จองสอบสำเร็จ', 'success');
+        setTimeout(() => showPage('bookings'), 1000);
 
         btn.disabled = false;
         btn.textContent = 'ยืนยันการจอง';
       });
 
       // Exam Form
-      document.getElementById('exam-form').addEventListener('submit', async (e) => {
+      document.getElementById('exam-form').addEventListener('submit', (e) => {
         e.preventDefault();
         
         const result = document.querySelector('input[name="exam-result"]:checked')?.value;
@@ -1489,15 +1476,13 @@
         const errorDiv = document.getElementById('exam-error');
         const btn = document.getElementById('exam-btn');
 
-        // Check if admin is logged in for exams with examiner
-        const booking = appState.allRecords.find(r => r.__backendId === appState.currentBookingId);
+        const booking = appState.allRecords.find(r => r.id === appState.currentBookingId);
         if (booking && booking.examiner !== '-' && !appState.currentAdmin) {
           errorDiv.textContent = 'เฉพาะอาจารย์ผู้คุมสอบเท่านั้นที่สามารถบันทึกผลได้';
           errorDiv.classList.remove('hidden');
           return;
         }
         
-        // Check if regular examiner is authorized to edit this booking
         if (booking && appState.currentAdmin && appState.currentAdmin.isExaminer && 
             booking.examiner !== '-' && booking.examiner !== appState.currentAdmin.fullName) {
           errorDiv.textContent = 'คุณไม่มีสิทธิ์บันทึกผลสอบนี้ เนื่องจากไม่ใช่ผู้คุมสอบของรายการนี้';
@@ -1515,43 +1500,26 @@
         btn.textContent = 'กำลังบันทึก...';
         errorDiv.classList.add('hidden');
 
-        if (booking && window.dataSdk) {
-          const updated = {
-            ...booking,
+        if (booking) {
+          updateRecord(booking.id, {
             status: 'completed',
             exam_result: result,
             exam_score: score,
             examiner_notes: notes,
             completed_at: new Date().toISOString()
-          };
+          });
 
-          const updateResult = await window.dataSdk.update(updated);
-          if (updateResult.isOk) {
-            showToast('บันทึกผลสำเร็จ', 'success');
-            if (appState.currentAdmin) {
-              setTimeout(() => showPage('admin-dashboard'), 1000);
-            } else {
-              setTimeout(() => showPage('bookings'), 1000);
-            }
+          showToast('บันทึกผลสำเร็จ', 'success');
+          if (appState.currentAdmin) {
+            setTimeout(() => showPage('admin-dashboard'), 1000);
           } else {
-            errorDiv.textContent = 'เกิดข้อผิดพลาด';
-            errorDiv.classList.remove('hidden');
+            setTimeout(() => showPage('bookings'), 1000);
           }
         }
 
         btn.disabled = false;
         btn.textContent = 'บันทึกผลการสอบ';
       });
-    });
-
-    // Initialize App
-    async function initApp() {
-      if (window.dataSdk) {
-        const initResult = await window.dataSdk.init(dataHandler);
-        if (!initResult.isOk) {
-          console.error('Failed to initialize Data SDK');
-        }
-      }
 
       // Check session
       const session = localStorage.getItem('crb_session');
@@ -1570,7 +1538,6 @@
         }
       }
 
-      // Check admin session
       const adminSession = localStorage.getItem('crb_admin_session');
       if (adminSession) {
         try {
@@ -1585,49 +1552,7 @@
           localStorage.removeItem('crb_admin_session');
         }
       }
-
-      // Update editable text
-      const config = window.elementSdk?.config || defaultConfig;
-      document.getElementById('title-main').textContent = config.app_title || defaultConfig.app_title;
-      document.getElementById('welcome-main').textContent = config.welcome_text || defaultConfig.welcome_text;
-    }
-
-    // Element SDK
-    if (window.elementSdk) {
-      window.elementSdk.init({
-        defaultConfig: defaultConfig,
-        onConfigChange: async (config) => {
-          document.getElementById('title-main').textContent = config.app_title || defaultConfig.app_title;
-          document.getElementById('welcome-main').textContent = config.welcome_text || defaultConfig.welcome_text;
-          
-          // Re-render topics if on topics page
-          const activePage = document.querySelector('.page-container.active');
-          if (activePage && activePage.id === 'topics-page') {
-            renderTopics();
-          }
-        },
-        mapToCapabilities: (config) => ({
-          recolorables: [],
-          borderables: [],
-          fontEditable: undefined,
-          fontSizeable: undefined
-        }),
-        mapToEditPanelValues: (config) => {
-          const map = new Map();
-          Object.keys(config).forEach(key => {
-            map.set(key, config[key] || defaultConfig[key] || '');
-          });
-          return map;
-        }
-      });
-    }
-
-    // Start app
-    if (document.readyState === 'loading') {
-      document.addEventListener('DOMContentLoaded', initApp);
-    } else {
-      initApp();
-    }
+    });
   </script>
- <script>(function(){function c(){var b=a.contentDocument||a.contentWindow.document;if(b){var d=b.createElement('script');d.innerHTML="window.__CF$cv$params={r:'9bd34595c368ce22',t:'MTc2ODI5MDMwMi4wMDAwMDA='};var a=document.createElement('script');a.nonce='';a.src='/cdn-cgi/challenge-platform/scripts/jsd/main.js';document.getElementsByTagName('head')[0].appendChild(a);";b.getElementsByTagName('head')[0].appendChild(d)}}if(document.body){var a=document.createElement('iframe');a.height=1;a.width=1;a.style.position='absolute';a.style.top=0;a.style.left=0;a.style.border='none';a.style.visibility='hidden';document.body.appendChild(a);if('loading'!==document.readyState)c();else if(window.addEventListener)document.addEventListener('DOMContentLoaded',c);else{var e=document.onreadystatechange||function(){};document.onreadystatechange=function(b){e(b);'loading'!==document.readyState&&(document.onreadystatechange=e,c())}}}})();</script></body>
+ <script>(function(){function c(){var b=a.contentDocument||a.contentWindow.document;if(b){var d=b.createElement('script');d.innerHTML="window.__CF$cv$params={r:'9bd37584733dfd23',t:'MTc2ODI5MjI2Ni4wMDAwMDA='};var a=document.createElement('script');a.nonce='';a.src='/cdn-cgi/challenge-platform/scripts/jsd/main.js';document.getElementsByTagName('head')[0].appendChild(a);";b.getElementsByTagName('head')[0].appendChild(d)}}if(document.body){var a=document.createElement('iframe');a.height=1;a.width=1;a.style.position='absolute';a.style.top=0;a.style.left=0;a.style.border='none';a.style.visibility='hidden';document.body.appendChild(a);if('loading'!==document.readyState)c();else if(window.addEventListener)document.addEventListener('DOMContentLoaded',c);else{var e=document.onreadystatechange||function(){};document.onreadystatechange=function(b){e(b);'loading'!==document.readyState&&(document.onreadystatechange=e,c())}}}})();</script></body>
 </html>
